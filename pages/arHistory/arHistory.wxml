@@ -1,0 +1,237 @@
+<view class="page">
+
+<!-- 顶部标题 + 玩法介绍 -->
+<view class="ar-header">
+  <image
+  class="ar-header-bg"
+  src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/top-area.jpg"
+  mode="aspectFill"
+></image>
+  <view class="ar-header-title-row">
+    <text class="ar-header-title">开元仿古记</text>
+  </view>
+  <view class="ar-header-desc">
+  <text>以正定开元寺为核心的数字化古建探秘之旅，用科技解锁唐塔、古钟与赑屃的千年故事。</text>
+</view>
+  <view class="ar-header-desc-context">
+    <text>1.进入页面获取古建探访地图与任务。</text>
+    <text>2.打卡焦林书屋等点位，解锁文化宝藏与历史典故。</text>
+    <text>3.完成全部探索，领取专属访古纪念徽章。</text>
+  </view>
+</view>
+
+<!-- 打卡进度卡片 -->
+<view class="progress-card">
+  <view class="progress-card-inner">
+    <!-- 中间淡黄色区域 -->
+    <view class="progress-panel">
+<view 
+class="progress-panel-bg"
+></view>
+        <!-- 1. 第一个：总进度勋章，仅展示，不对应具体 POI -->
+        <view class="history-medal-item history-medal-item-summary">
+          <image
+            class="history-medal-icon-summary {{!getPrise ? '':'history-medal-icon-hiden'}}"
+            src="{{progressPercent < 100 ? 'https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/collection-processing.png' : 'https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/collection-success.png'}}"   
+            mode="aspectFit"
+          />
+        </view>
+
+      <block wx:if="{{progressPercent < 100}}">
+<!-- 勋章行 -->
+<view class="history-medal-row">
+
+        <!-- 2. 后面的正常勋章：来自 POI_LIST（medalIcon + status） -->
+        <block wx:for="{{checkinPoiList}}" wx:key="id">   
+          <view class="history-medal-item">
+            <image
+              class="history-medal-icon"
+              src="{{item.status === 'done' ? item.medalIconUnlockTop : item.medalIcon}}"
+              mode="aspectFit"
+            />
+            <text class="{{ item.status === 'done' ? 'history-medal-state-done' : 'history-medal-state' }}">
+              {{ item.status === 'done' ? '已完成' : '待解锁' }}
+            </text>
+          </view>
+        </block>
+      </view>
+    </block>
+      <!-- 状态二：收集满 100% ► 显示 arHistoryProgressed 图标 + 两行字 + 福袋 -->
+  <block wx:elif="{{progressPercent === 100}}">
+  <block wx:if="{{!getPrise}}">
+    <view class="history-full-wrapper">
+
+      <!-- 中间：两行文案 -->
+      <view class="history-full-text">
+        <text class="history-full-line1">恭喜，收集完成！</text>
+        <text class="history-full-line2">快点击右方福袋领取祝福吧！</text>
+      </view>
+
+      <!-- 右侧：福袋（点击触发 onGetReward） -->
+      <view class="history-luckybag" bindtap="onGetReward">
+        <image
+          class="history-luckybag-icon"
+          src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/luckybag.png"
+          mode="aspectFit"
+        />
+      </view>
+    </view>
+  </block>
+  <block wx:else>
+    <view class="history-full-wrapper-claimed">
+      <text class="history-full-claimed-text">
+        所有点位已成功解锁，获得福袋：
+      </text>
+      <view
+        class="history-claimed-prize-icon prize{{prizeIndex}}"
+      ></view>
+    </view>
+  </block>
+  </block>
+    </view>
+  </view>
+</view>
+
+
+<!-- 打卡点位标题 -->
+<view class="section-header">
+  <text class="section-title">打卡点位</text>
+</view>
+
+<!-- 列表滚动区域：从“打卡点位”下面开始 -->
+<scroll-view class="checkin-scroll" scroll-y="true">
+  <block wx:for="{{checkinPoiList}}" wx:key="id">
+  <view class="checkin-card" bindtap="onTapCheckinCard" data-id="{{item.id}}">
+    <!-- 背景封面图：占满整张卡片 -->
+    <image class="checkin-card-bg" src="{{item.status === 'done' ? item.checkinHistoryCover : item.uncheckinHistoryCover}}" mode="aspectFill" />
+
+    <!-- 内容层：左信息条 + 右上状态 -->
+    <view class="checkin-card-content">
+
+      <!-- 左侧渐变信息条 -->
+      <view class="checkin-card-left">
+        <text class="checkin-index">{{item.displayIndex}}</text>
+        <text class="checkin-name">{{item.name}}</text>
+        <text class="checkin-tip">点击查看详情</text>
+      </view>
+
+      <!-- 右上角状态块（白色圆角底，内部图片+文字） -->
+      <view class="checkin-status-wrapper">
+        <view class="checkin-status-box">
+          <image class="checkin-status-icon" src="{{item.status === 'done' ? item.medalIconUnlock : item.medalIcon}}" mode="widthFix" />
+          <view class="checkin-status-text-bg {{ item.status === 'todo' ? 'checkin-status-text-bg-todo' : 'checkin-status-text-bg-done' }}">
+            <text class="checkin-status-text">
+              {{ item.status === 'done' ? '已完成' : '去探索' }}
+            </text>
+          </view>
+          </view>
+      </view>
+
+    </view>
+  </view>
+  </block>
+
+  <!-- 为了不被底部 tabbar 遮挡，加一点空白 -->
+  <view class="scroll-bottom-space"></view>
+</scroll-view>
+
+<!-- 详情弹窗 -->
+<view wx:if="{{showPopup}}" class="popup-mask" catchtap="onMaskTap">
+  <view class="popup" catchtap="onPopupTap">
+    <image
+    class="popup-bg"
+    src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/introPanel.png"
+  />
+  <view class="popup-close" bindtap="onClosePopup">✕</view>
+    <view class="popup-header">
+      <text class="popup-title">{{currentPoi.name}}</text>
+
+    </view>
+
+    <!-- 固定比例的封面区域 -->
+    <view class="popup-cover">
+      <image class="popup-cover-img"
+             src="{{currentPoi.coverImage}}"
+             mode="aspectFill" />
+    </view>
+
+    <!-- 文本区域，可滚动 -->
+    <scroll-view class="popup-content" scroll-y="true">
+      <text class="popup-desc">{{currentPoi.description_history}}</text>
+    </scroll-view>
+
+    <!-- 底部按钮 -->
+    <view class="popup-btn-row">
+      <view class="popup-btn" bindtap="onCheckin">
+        打卡
+      </view>
+      <view class="popup-btn" bindtap="onStartNav">
+        开始AR导航
+      </view>
+    </view>
+
+  </view>
+</view>
+
+<!-- 奖励弹窗 -->
+<view wx:if="{{showAward}}" class="popup-mask" catchtap="onMaskTap">
+  <view class="popup-award" catchtap="onPopupTap">
+    <view class=".popup-close-award" bindtap="onClosePopup">✕</view>
+    <view class="popup-header-award">
+      <text class="popup-title-award">恭喜您解锁了所有点位</text>
+    </view>
+
+    <!-- 固定比例的封面区域 -->
+    <view wx:if="{{!getPrise}}" class="popup-cover-award">
+      <image class="popup-cover-img"
+             src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/pop-panel-2-fudai.png"
+             mode="aspectFit" />
+    </view>
+
+    <view wx:if="{{getPrise}}" class="popup-cover-award">
+      <image class="popup-cover-img-2"
+             src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/prize{{prizeIndex}}.png"
+             mode="aspectFit" />
+    </view>
+
+    <!-- 底部按钮 -->
+    <view wx:if="{{!getPrise}}" class="popup-btn-row">
+      <view class="popup-btn-award" bindtap="onSaveToLocal">
+       
+      </view>
+    </view>
+
+  </view>
+</view>
+
+<!-- 底部标签栏（单选） -->
+<view class="tabbar">
+  <view
+    class="tab-item {{currentTab === 'checkin' ? 'tab-item-active' : ''}}"
+    data-tab="checkin"
+    bindtap="onChangeTab"
+  >
+
+    <text class="tab-label">AR打卡</text>
+  </view>
+
+  <view
+    class="tab-item {{currentTab === 'home' ? 'tab-item-active' : ''}}"
+    data-tab="home"
+    bindtap="onChangeTab"
+  >
+
+    <text class="tab-label">主页</text>
+  </view>
+
+  <view
+    class="tab-item {{currentTab === 'history' ? 'tab-item-active' : ''}}"
+    data-tab="history"
+    bindtap="onChangeTab"
+  >
+
+    <text class="tab-label">AR访古</text>
+  </view>
+</view>
+
+</view>

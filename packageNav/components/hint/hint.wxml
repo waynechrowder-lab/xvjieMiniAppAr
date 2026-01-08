@@ -1,0 +1,13 @@
+<view class="hint_layer">
+  <view class="hint_content">
+    <canvas
+      type="2d"
+      id="canvas"
+      class="mycanvas"
+    ></canvas>
+    <view class="hint_txt">
+      <view>请竖起手机扫描周围空间</view>
+      <view>大厅、商铺等更容易识别哦~</view>
+    </view>
+  </view>
+</view>

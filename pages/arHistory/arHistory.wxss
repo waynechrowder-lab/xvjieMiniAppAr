@@ -1,0 +1,621 @@
+page, .page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f7f3e9;
+}
+
+/* 顶部区域 */
+.ar-header {
+  position: relative;
+  width: 100%;
+  height: 32vh;          /* ★ 关键：占屏幕 20% 高度 */
+  overflow: hidden;
+}
+
+/* 背景图铺满整个 header */
+.ar-header-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;          /* 占满 20vh 的容器 */
+  display: block;
+}
+
+.ar-header-title-row {
+  position: relative;
+  z-index: 1;             /* 比图片高即可 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 100rpx 32rpx 24rpx;  /* 用 padding 控制在图上的位置 */
+  flex-direction: column;
+  align-items: flex-start;   /* ★ 改这里 */
+}
+
+.ar-header-title {
+  font-size: 55rpx;
+  font-weight: 600;
+  color:#65460C
+}
+
+.ar-header-desc{
+  position: relative;
+  padding: 0rpx 33rpx 24rpx;
+}
+.ar-header-desc text {
+  display: block;
+  font-size: 30rpx;
+  line-height: 1.4;
+  color: #654B19;
+}
+.ar-header-desc-context{
+  position: relative;
+  padding: 20rpx 48rpx 24rpx;
+}
+.ar-header-desc-context text {
+  display: block;
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #654B19;
+}
+
+
+/* 打卡进度卡片 */
+/* 卡片整体（可以复用你原来的） */
+.progress-card {
+  margin: -50rpx 0rpx 16rpx;
+  padding: 16rpx 24rpx;
+  border-radius: 45rpx;
+  background-color: #ffffff;
+  z-index: 1;
+}
+
+.progress-card-inner {
+  position: relative;
+}
+
+/* 中间淡黄色区域 */
+.progress-panel {
+  position: relative;
+  /* border-radius: 32rpx 999rpx 999rpx 32rpx; */
+  padding: 24rpx 24rpx 20rpx;
+  width: 100rpx;
+  height: 130rpx;
+}
+
+.progress-panel-bg{
+  width: 680rpx;
+  height: 130rpx;
+  margin-left: 0rpx;
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/slider-bg.png");
+  background-size: contain;
+}
+
+/* 勋章排布：一排排，自动换行 */
+.history-medal-row {
+  margin-top: -100rpx;
+  margin-left: 150rpx;
+  display: flex;
+  justify-content: space-between;
+  width: 490rpx;
+}
+
+/* 单个勋章：上icon，下文字 */
+.history-medal-item {
+  margin-top: 8rpx;
+  width: 150rpx;        /* 每个勋章占的宽度，可调 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 总进度勋章可以稍微宽一点（可选） */
+.history-medal-item-summary {
+  width: 160rpx;
+  margin: -145rpx -20rpx;
+}
+
+/* 勋章图标 */
+.history-medal-icon {
+  width:90rpx;
+  height: 90rpx;
+}
+
+.history-medal-icon-summary {
+  width: 160rpx;
+  height: 160rpx;
+}
+.history-medal-icon-hiden{
+  opacity: 0;
+}
+
+/* 勋章下面的状态文字：待解锁 / 已完成 */
+.history-medal-state {
+  font-size: 23rpx;
+  text-align: center;
+  color: #858585;
+  margin: 0;
+  margin-top: -35rpx;
+}
+.history-medal-state-done{
+  font-size: 23rpx;
+  text-align: center;
+  color: #C06A59;
+  margin: 0;
+  margin-top: -35rpx;
+}
+
+/* 100% 完成时的整块布局：左图 + 中间两行字 + 右福袋 */
+.history-full-wrapper {
+  display: flex;
+  align-items: center;
+  margin-top: 15rpx;
+}
+
+/* 中间两行文案 */
+.history-full-text {
+  flex: 1;
+  margin: 0 16rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.history-full-line1 {
+  font-size: 28rpx;
+  margin-left: 150rpx;
+  color: #ff0000;
+  width: 500rpx;
+}
+
+.history-full-line2 {
+  font-size: 28rpx;
+  margin-left: 150rpx;
+  color: #ff0000;
+  width: 500rpx;
+}
+
+/* 右侧福袋按钮 */
+.history-luckybag {
+  margin-left: -150rpx;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96rpx;
+  height: 96rpx;
+}
+
+.history-luckybag-icon {
+  position: relative;
+}
+
+/* 已领取状态：只显示一行文字 + 图片 */
+.history-full-wrapper-claimed {
+  display: flex;
+  justify-content: center;
+  width: 600rpx;
+  margin-left: 10rpx;
+  margin-top: 10rpx;
+}
+
+.history-full-claimed-text {
+  font-size: 28rpx;
+  color: #985D10;
+  text-align: center;
+}
+
+.history-claimed-prize-icon {
+  margin-left: 40rpx;
+  width: 88rpx;   /* 按你的图实际比例调 */
+  height: 116rpx;
+  /* background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/prize.png"); */
+  background-size: contain;
+}
+.prize1 {
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/prize1.png");
+}
+.prize2 {
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/prize2.png");
+}
+.prize3 {
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/prize3.png");
+}
+.prize4 {
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/prize4.png");
+}
+.prize5 {
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/prize5.png");
+}
+
+/* 打卡点位标题 */
+.section-header {
+  padding: 16rpx 32rpx 8rpx;
+}
+
+.section-title {
+  font-size: 35rpx;
+  font-weight: 600;
+  color: #785718;
+}
+
+/* 列表滚动区域：只占剩余高度 */
+.checkin-scroll {
+  flex: 1;
+  height: 0;                 /* 配合 flex:1 占满剩余空间 */
+  padding: 10rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.scroll-bottom-space {
+  height: 200rpx;            /* 防止被底部 tabbar 遮挡 */
+}
+
+/* 单个打卡卡片 */
+/* 整张打卡卡片容器 */
+.checkin-card {
+  position: relative;
+  margin-top: 24rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  height: 300rpx;                /* 卡片高度，可按视觉微调 */
+  box-shadow: 0 6rpx 18rpx rgba(0,0,0,0.08);
+}
+
+/* 背景封面图：占满整个卡片 */
+.checkin-card-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 内容层：把左条和右上状态叠在封面图上 */
+.checkin-card-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* 左侧渐变信息条：从左到右渐变消失 */
+.checkin-card-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 500rpx;                 /* 信息条宽度，可调整 */
+  padding: 24rpx 16rpx;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 编号、名称、提示 */
+.checkin-index {
+  font-size: 35rpx;
+  font-weight: 300;
+  color: #ffffff;
+}
+
+.checkin-name {
+  margin-top: -80rpx;
+  font-size: 55rpx;
+  font-weight: 300;
+  color: #ffffff;
+}
+
+.checkin-tip {
+  font-size: 28rpx;
+  font-weight: 300;
+  color: #ffffff;
+}
+
+/* 右上角状态外壳：摆放位置 */
+.checkin-status-wrapper {
+  position: absolute;
+  right: 20rpx;
+  top: 50rpx;
+}
+
+/* 白色圆角底：内部上下布局（上图标，下文字） */
+.checkin-status-box {
+  width: 140rpx;
+  height: 200rpx;
+  padding: 12rpx 20rpx;
+  border-radius: 32rpx;
+  background-color: #FFF7F0;
+
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+}
+
+.checkin-status-icon {
+  width: 200rpx;
+  margin: -25rpx -30rpx;
+}
+
+.checkin-status-text {
+  opacity: 0;
+  margin-top: -32rpx;
+  display: block;
+  text-align: center;        /* 水平居中 */
+  font-size: 32rpx;
+  line-height: 1.3;          /* 配合 padding，让字在中间，不贴底 */
+  color: #ffffff;
+}
+.checkin-status-text-bg {
+  margin-top: -10rpx;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  padding: 6rpx 0;           /* 只做上下 padding，控制高度 */
+  margin-left: -15rpx;
+  height: 60rpx;
+  border-radius: 30rpx;      /* 保留你原来的圆角 */
+  width: 180rpx;
+}
+
+.checkin-status-text-bg-todo {
+  margin-top: -10rpx;
+  margin-left: -25rpx;
+
+  border-radius: 30rpx;      /* 保留你原来的圆角 */
+  width: 190rpx;
+  height: 69rpx;
+  /* 这里换成你的上下渐变（或者先用纯色调试） */
+  /* background: linear-gradient(180deg, #ffe7ba, #ff944a); */
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/uncheckinButton.png");
+  background-size: contain;
+}
+
+.checkin-status-text-bg-done{
+  margin-top: -10rpx;
+  margin-left: -25rpx;
+  border-radius: 30rpx;      /* 保留你原来的圆角 */
+  width: 190rpx;
+  height: 69rpx;
+  /* 这里换成你的上下渐变（或者先用纯色调试） */
+  /* background: linear-gradient(180deg, #ffe7ba, #ff944a); */
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/checkinButton.png");
+  background-size: contain;
+}
+
+/* 弹窗 */
+/* 弹窗遮罩：竖向居中偏上 */
+.popup-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.65);
+  z-index: 99;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;  /* 让弹窗靠上 */
+  padding-top: 420rpx;      /* 往下一点，看着更居中偏上 */
+}
+
+/* 弹窗本体：上下结构 */
+.popup {
+  position: relative;
+  width: 92%;
+  min-height: 100rpx;
+  height: 65%;
+  border-radius: 24rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.popup-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.popup-award {
+  margin-top: -100rpx;
+  width: 684rpx;
+  height: 944rpx;
+  /* max-height: 100%; */
+  /* background-color: rgb(255, 242, 215); */
+  border-radius: 24rpx;
+  overflow: hidden;
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/pop-panel-2.png");
+  background-size: contain;
+}
+
+.popup-header-award {
+  align-items: center;
+  padding: 24rpx 28rpx 12rpx;  /* 左右 28rpx，方便和图片对齐 */
+}
+
+.popup-close-award {
+  position: absolute;
+  right: 50rpx;
+  font-size: 45rpx;
+  color: rgba(34, 34, 34, 0);
+}
+
+/* 标题行固定高度 */
+/* 标题行跟图片之间留一点间距 */
+.popup-header {
+  margin-top: 70rpx;
+  position: relative;      /* 必须加：让子元素 absolute 以它为参考 */
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.popup-title {
+  position: absolute;       /* 绝对定位 */
+  left: 50%;
+  transform: translateX(-50%);  /* 水平居中 */
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #664812;
+}
+
+.popup-title-award {
+  position: absolute;       /* 绝对定位 */
+  font-size: 35rpx;
+  font-weight: 400;
+  color: #AC371F;
+  margin: 20rpx 130rpx; /*居中*/
+}
+
+.popup-close {
+  position: absolute;
+  right: -10rpx;        /* 可以调整，比如 20rpx */
+  top: -20rpx;          /* 可以调整，比如 20rpx */
+  font-size: 45rpx;
+  padding: 20rpx;     /* 点击区域更大更好点 */
+  color: rgba(34, 34, 34, 0);
+}
+
+/* 封面区域：左右和标题对齐，固定高度做裁剪 */
+.popup-cover {
+  flex-shrink: 0;
+  width: 100%;
+  height: 244rpx;          /* 325:132 的比例，高度你可以微调 */
+  padding: 0 45rpx;        /* ★ 和标题左右对齐 */
+  box-sizing: border-box;
+  margin-top: 50rpx;
+}
+.popup-cover-award {
+  flex-shrink: 0;
+  width: 100%;
+  height: 800rpx;
+  padding: 0 28rpx;        /* ★ 和标题左右对齐 */
+  box-sizing: border-box;
+}
+
+/* 封面图：铺满这个区域，居中裁剪 + 圆角 */
+.popup-cover-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  transform: translate(0%, 0%);
+}
+
+.popup-cover-img-2 {
+  width: 80%;
+  height: 80%;
+  display: block;
+  transform: translate(12%, 25%);
+}
+
+/* 文本区域：占据中间、可滚动 */
+.popup-content {
+  width: 95%;
+  margin-top: 10rpx;
+  margin-left: 20rpx;
+  height: 240rpx;
+  padding: 24rpx 50rpx;
+  box-sizing: border-box;
+}
+::-webkit-scrollbar {
+  width: 0.5px;
+  height: 10px;
+  color:#ffffff00;
+}
+.popup-desc {
+  font-size: 26rpx;
+  line-height: 1.4;
+  color: #664812;
+}
+
+/* 底部按钮：固定在最下 */
+/* 按钮所在的一行：负责右对齐 */
+.popup-btn-row {
+  position: absolute;
+  bottom: 60rpx;       /* ★ 按钮向上移动的关键！想多少就是多少 */
+  left: 0;
+  width: 80%;
+  margin-left: 65rpx;
+  display: flex;
+  justify-content:space-between;  /* 居中按钮 */
+  z-index: 5;               /* 在内容上方 */
+  pointer-events: auto;
+}
+
+.popup-btn {
+  opacity: 0;
+  display: inline-flex;      /* 内部文字水平垂直居中 */
+  align-items: center;
+  justify-content: center;
+  width: 250rpx;             /* 可自己调宽度 */
+  height: 80rpx;
+  font-size: 28rpx;
+  z-index: 2;
+}
+
+.popup-btn-award {
+  width: 380rpx;
+  height: 110rpx;
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/button_open.png");
+  transform: translate(30%, -350%);
+}
+
+/* 底部标签栏：照 index 逻辑，单选高亮 */
+/* 底部区域：高度 100rpx */
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* background-color: rgba(124, 38, 38); */
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  /* box-shadow: 0 -4rpx 12rpx rgba(0,0,0,0.06); */
+  z-index: 98;
+  background-image: url("https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/histroy/bottom.png");
+  background-size: contain;
+  width: 858rpx;
+  height: 312rpx;
+  transform: translate(-4%, 9%);
+}
+
+/* 每个 tab 按钮：垂直布局（icon 上、文字下） */
+.tab-item {
+  opacity: 0;
+  height: 200rpx;
+  width: 150rpx;
+  margin-bottom: 80rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* icon：比底部区域更高一点，用 translateY 往上提 */
+.tab-icon {
+  width: 100rpx;                            /* 自己调整尺寸 */
+  height: 100rpx;
+  margin-top: 0rpx;
+  /* transform: translateY(-12rpx);           */
+}
+
+/* 文字标签 */
+.tab-label {
+  font-size: 28rpx;
+  margin-top: 0rpx;
+  color: #ffad5b;
+}
+
+/* 选中态：改文字颜色，也可以再加别的效果 */
+.tab-item-active .tab-label {
+  color: #ffffff;
+}
+

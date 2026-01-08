@@ -1,0 +1,429 @@
+<view class="page">
+  <clsvk id="clsvk" wx:if="{{showClsVk}}" firstLocate="{{firstLocate}}" bind:loaded="clsvkLoaded"
+    bind:arrived="navArrived" bind:message="navMessage" bind:erect="phoneErect" bind:locate="locateSuccess"
+    bind:reset="resetRoute" bind:updatefloor="updateFloor" bind:fail="locateFail" bind:vkchange="vkChange"
+    bind:vkready="vkReady" bindnavbreak="navBreak"></clsvk>
+
+  <view wx:if="{{showTakePhoto}}" aria-role="button" aria-label="打卡拍照" bindtap="onTakePhoto" class="takePhoto_click">
+    打卡拍照</view>
+
+  <!-- 打卡照预览弹层 -->
+  <view wx:if="{{showCheckin}}" class="checkinMask">
+
+    <!-- 面板：点内部不关闭 -->
+    <view class="checkinPanel">
+      <image class="checkinShot" src="{{checkinImage}}" mode="widthFix"></image>
+
+      <!-- 保存：面板底部 -->
+      <view class="checkinSave" bindtap="saveCheckin" hover-class="tapDown">
+
+      </view>
+
+      <!-- 关闭：面板下方（面板外部） -->
+      <view class="checkinClose" bindtap="closeCheckin" hover-class="tapDown">
+
+      </view>
+    </view>
+  </view>
+
+
+  <block wx:if="{{showDescription && descriptionPoi !== null}}">
+    <view class="description_area">
+      <scroll-view class="description_scroll" scroll-y="true">
+        <view class="description_title">
+          {{descriptionPoi.name}}
+        </view>
+
+        <view class="description_des">
+          {{descriptionPoi.description}}
+        </view>
+      </scroll-view>
+    </view>
+    <view class="description_skip" bindtap="onSkipDescription"></view>
+  </block>
+
+
+  <view class="mask" bindtap="maskTap" wx:if="{{!shopFold}}"></view>
+
+  <view class="mask_floor" bindtap="maskFloorTap" wx:if="{{!floorFold}}"></view>
+  <view class="popup_shop {{shopFold ? '' : 'popup_shop_unfold'}}" hidden="{{navigating}}">
+    <view aria-role="button" aria-label="AR导航目的地详细列表，点击后可弹出或者收回" class="operate_bar" bindtap="shopPopupFold">
+      <image aria-label="打开AR导航详细列表" wx:if="{{shopFold}}" class="unfold_icon" src="../../assets/nav/nav_icon_up.png">
+      </image>
+      <image aria-label="关闭AR导航详细列表" wx:else class="packup_icon" src="../../assets/nav/nav_icon_up.png"></image>
+    </view>
+    <block wx:if="{{!showSearch}}">
+      <view aria-role="searchbox" aria-label="AR导航目的地搜索区域" class="input_content">
+        <view class="input_view {{pickerList.length > 1 ? 'input_view_building' : ''}}">
+
+          <input aria-role="search" aria-label="搜索目的地" class="search_input" type="text" placeholder="请输入你想要搜索的景点"
+            placeholder-class="search_placeholder" bindfocus="searchFoucs" bindtap="searchTap"
+            disabled="{{disabledSearch}}" adjust-position="{{false}}" />
+        </view>
+        <view aria-role="button" aria-label="搜索" bindtap="onClickSearch" class="search_click">搜索</view>
+        <view aria-role="menu" class="building_picker" wx:if="{{pickerList.length > 1}}">
+          <picker bindchange="buildingChange" bindtap="buildingTap" range="{{pickerList}}" value="{{pickerIndex}}"
+            range-key="value" disabled="{{shopFold}}">
+            <view class="picker_view">{{pickerList[pickerIndex].value}}</view>
+          </picker>
+          <image class="picker_arrow"
+            src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/picker_arrow.png"></image>
+        </view>
+      </view>
+      <view class="first_sort2">
+        <view aria-role="tab" wx:for="{{tabList}}" wx:key="index"
+          class="first_sort2_item {{activeTab == item.key ? 'first_sort2_item_active' : ''}}" bindtap="selectTab"
+          data-key="{{item.key}}">{{item.value}}</view>
+      </view>
+      <view class="shop_main">
+        <view class="floor_view">
+          <view aria-role="button" class="floor_item {{activeFloor == '' ? 'floor_active' : ''}}" bindtap="selectFloor"
+            data-key="">全部</view>
+          <view class="floor_item {{activeFloor == item.key ? 'floor_active' : ''}}" wx:for="{{floorList}}"
+            wx:key="index" bindtap="selectFloor" data-key="{{item.key}}">{{item.value}}</view>
+        </view>
+        <view class="shop_content">
+          <view class="second_sort" wx:if="{{tags.length}}">
+            <view aria-role="button" class="second_sort_item {{activeTag == '' ? 'second_sort_active' : ''}}"
+              bindtap="selectTag" data-key="">全部</view>
+            <view class="second_sort_item {{activeTag == item.key ? 'second_sort_active' : ''}}" wx:for="{{tags}}"
+              wx:key="index" bindtap="selectTag" data-key="{{item.key}}">{{item.value}}</view>
+          </view>
+          <view class="shop_list_container">
+            <scroll-view id="scrollview" class="shop_list {{!showShareGuide ? 'shop_list_scroll' : ''}}" scroll-y="true"
+              scroll-x="false" bindscrolltolower="scrollToLower" enhanced="true">
+              <block wx:for="{{shopList}}" wx:key="id">
+                <van-swipe-cell wx:if="{{index < shopLength}}" id="{{'swipe-cell' + item.id}}"
+                  right-width="{{ item.kind != 2 ? 0 : 0 }}" async-close bind:close="swipeClose"
+                  bind:click="swipeClick">
+                  <view class="shop_item list_item">
+                    <view class="shop_img_view">
+                      <image wx:if="{{item.logo}}" class="shop_img" src="{{item.logo + '?imageView2/2/w/144'}}"
+                        lazy-load="{{true}}" mode="aspectFit"></image>
+                      <image wx:else class="shop_img"
+                        src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/nav/nav-icon.png">
+                      </image>
+                      <view wx:if="{{item.tips}}" class="shop_img_tips">{{item.tips}}</view>
+                    </view>
+                    <view aria-role="button" class="shop_info" bindtap="selectShop" data-poi="{{item}}">
+                      <view class="shop_title">{{item.name}}</view>
+                      <view class="shop_attr">{{item.typeName}}</view>
+                    </view>
+                    <view aria-role="button" class="shop_nav" bindtap="selectShop" data-poi="{{item}}">
+                      <image class="shop_nav_icon"
+                        src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/nav/nav-icon.png">
+                      </image>
+                      <!-- <view class="shop_nav_text">AR导航</view> -->
+                    </view>
+                  </view>
+                  <!-- <view aria-role="button" aria-label="分享" aria-label="搜索" slot="right" class="shop_nav shop_share" bindtap="openShopShare" data-poi="{{item}}">
+                    <image class="shop_nav_icon" src="https://sightp-tour-cdn.sightp.com/wxapp/remote/zhangjiangYSZX/huizhiBusiness/share.png"></image>
+                    <view class="shop_nav_text">分享</view>
+                  </view> -->
+                </van-swipe-cell>
+              </block>
+              <view class="shop_none" wx:if="{{!shopList.length}}"></view>
+            </scroll-view>
+            <view aria-role="button" aria-label="左滑即可分享商铺位置，点击关闭引导" class="share_guide" catchtouchmove="prevent"
+              bindtap="closeGuide" wx:if="{{showShareGuide}}">
+              <view class="share_mask"></view>
+              <view class="share_guide_tip">左滑即可分享商铺位置</view>
+              <van-swipe-cell id="swipe-cell-guide" right-width="{{ shopList[0].kind != 2 ? 0 : 0 }}"
+                bind:click="swipeGuideClick">
+                <view class="shop_item shop_item_guide">
+                  <view class="shop_img_view">
+                    <image wx:if="{{shopList[0].logo}}" class="shop_img"
+                      src="{{shopList[0].logo + '?imageView2/2/w/144'}}" lazy-load="{{true}}" mode="aspectFit"></image>
+                    <image wx:else class="shop_img"
+                      src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/shop_default.png"></image>
+                    <view wx:if="{{shopList[0].tips}}" class="shop_img_tips">{{shopList[0].tips}}</view>
+                  </view>
+                  <view class="shop_info">
+                    <view class="shop_title">{{shopList[0].name}}</view>
+                    <view class="shop_attr">{{shopList[0].typeName}}</view>
+                  </view>
+                  <view class="shop_nav">
+                    <image class="shop_nav_icon"
+                      src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/nav/nav-icon.png">
+                    </image>
+                    <!-- <view class="shop_nav_text">AR导航</view> -->
+                  </view>
+                </view>
+                <!-- <view slot="right" class="shop_nav shop_share">
+                  <image class="shop_nav_icon" src="https://sightp-tour-cdn.sightp.com/wxapp/remote/zhangjiangYSZX/huizhiBusiness/share.png"></image>
+                  <view class="shop_nav_text">分享</view>
+                </view> -->
+              </van-swipe-cell>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!-- 搜索 -->
+    <block wx:else>
+      <view aria-role="searchbox" class="input_content">
+        <view class="input_view input_view_search">
+          <!-- <image aria-role="img" aria-label="搜索图标" class="search_icon" src="../../assets/nav/search.png"></image> -->
+          <input aria-role="search" class="search_input" type="text" placeholder="请输入你想要搜索的景点"
+            placeholder-class="search_placeholder" bindinput="searchInput" bindfocus="searchFoucs" bindtap="searchTap"
+            value="{{searchVal}}" adjust-position="{{false}}" focus="{{inputFocus}}" />
+          <!-- <image aria-role="button" aria-label="清除搜索内容" wx:if="{{searchVal}}" bindtap="searchClear" class="search_close_icon" src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/search_close_icon.png"></image> -->
+        </view>
+        <view aria-role="button" aria-label="搜索" bindtap="onClickSearch" class="search_click">搜索</view>
+        <view aria-role="button" aria-label="取消" bindtap="searchCancel" class="search_cancel">x</view>
+      </view>
+      <view class="search_main">
+        <block wx:for="{{searchRes}}" wx:key="index">
+          <view class="search_res_content" wx:for="{{item.firstSortList}}" wx:for-item="item2" wx:for-index="index2"
+            wx:key="index2" wx:if="{{item2.shopList.length}}">
+            <view wx:if="{{pickerList.length > 1}}" class="search_res_title">{{item.value}} > {{item2.value}}</view>
+            <view wx:else class="search_res_title">{{item2.value}}</view>
+            <block wx:for="{{item2.shopList}}" wx:for-item="item3" wx:for-index="index3" wx:key="id">
+              <van-swipe-cell wx:if="{{index3 < 50}}" id="{{'swipe-cell' + item.id}}"
+                right-width="{{ item.kind != 2 ? 0 : 0 }}" async-close bind:close="swipeClose" bind:click="swipeClick">
+                <view class="shop_item search_item">
+                  <view class="shop_img_view">
+                    <image wx:if="{{item3.logo}}" class="shop_img" mode="aspectFit"
+                      src="{{item3.logo + '?imageView2/2/w/144'}}" lazy-load="{{true}}"></image>
+                    <image wx:else class="shop_img"
+                      src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/nav/nav-icon.png">
+                    </image>
+                    <view wx:if="{{item3.tips}}" class="shop_img_tips">{{item3.tips}}</view>
+                  </view>
+                  <view aria-role="button" class="shop_info" bindtap="selectShop" data-poi="{{item3}}">
+                    <view class="shop_title">{{item3.name}}</view>
+                  </view>
+                  <view aria-role="button" class="shop_nav" bindtap="selectShop" data-poi="{{item3}}">
+                    <image class="shop_nav_icon"
+                      src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/nav/nav-icon.png">
+                    </image>
+                    <!-- <view class="shop_nav_text">AR导航</view> -->
+                  </view>
+                </view>
+                <!-- <view  aria-role="button"  aria-label="分享" slot="right" class="shop_nav shop_share" bindtap="openShopShare" data-poi="{{item3}}">
+                  <image class="shop_nav_icon" src="https://sightp-tour-cdn.sightp.com/wxapp/remote/zhangjiangYSZX/huizhiBusiness/share.png"></image>
+                  <view class="shop_nav_text">分享</view>
+                </view> -->
+              </van-swipe-cell>
+            </block>
+          </view>
+        </block>
+      </view>
+    </block>
+  </view>
+  <view class="popup_floor {{floorFold ? '' :'popup_floor_unfold'}}">
+    <view aria-role="button" class="operate_bar" bindtap="maskFloorTap">
+      <image class="packup_icon" src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/packup_icon.png">
+      </image>
+    </view>
+    <view class="popup_floor_title">
+      <!-- <view>开始导航前</view> -->
+      <view>请选择您当前所在楼层</view>
+    </view>
+    <view class="floor_picker">
+      <view class="picker_center"></view>
+      <picker-view indicator-style="height: 40px;" class="picker" value="{{floorVal}}" bindchange="pickerChange">
+        <picker-view-column>
+          <view class="picker_item" wx:for="{{floorList}}" wx:key="index" style="line-height: 40px">
+            {{item.value}}
+          </view>
+        </picker-view-column>
+      </picker-view>
+    </view>
+    <view aria-role="button" aria-label="重新定位" class="popup_floor_btn" bindtap="confirmFloor">重新定位</view>
+  </view>
+  <!-- 乘电梯提示 -->
+  <view class="bylift_remind dark_bg" wx:if="{{byliftRemind}}">
+    <view class="bylift_content">
+      <view wx:if="{{breakAction == 'Escalator'}}" class="bylift_title">请乘扶梯至{{targetFloorName}}</view>
+      <view wx:if="{{breakAction == 'Elevator'}}" class="bylift_title">请乘直梯至{{targetFloorName}}</view>
+      <view wx:if="{{breakAction == 'Stairs'}}" class="bylift_title">请沿步梯至{{targetFloorName}}</view>
+      <image wx:if="{{breakAction == 'Escalator'}}" class="bylift_img"
+        src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/by_lift.png"></image>
+      <image wx:if="{{breakAction == 'Elevator'}}" class="bylift_img"
+        src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/by_elevator.png"></image>
+      <image wx:if="{{breakAction == 'Stairs'}}" class="bylift_img"
+        src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/by_stairs.png"></image>
+      <view wx:if="{{breakAction == 'Stairs'}}" class="bylift_tip">为了您的安全，上下楼梯时请勿查看手机</view>
+      <view wx:if="{{breakAction == 'Escalator'}}" class="bylift_tip">为了您的安全，乘坐扶梯时请勿查看手机</view>
+      <view wx:if="{{breakAction == 'Elevator'}}" class="bylift_tip">为了您的安全，乘坐直梯时请勿查看手机</view>
+      <view aria-role="button" wx:if="{{countTime > 0}}" class="bylift_btn disable_btn" bindtap="liftDisable">
+        到达{{targetFloorName}}后请点我（{{countTime}}s）</view>
+      <view aria-role="button" wx:else class="bylift_btn" bindtap="liftSuccess">到达{{targetFloorName}}后请点我</view>
+    </view>
+  </view>
+  <!-- 识别提示 -->
+  <view class="bylift_remind" wx:if="{{showScan}}">
+    <image aria-role="button" aria-label="关闭" class="layer_close_btn" bindtap="closeLayer"
+      src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/close_icon_light.png"></image>
+    <view class="bylift_content" wx:if="{{vioReady}}">
+      <block wx:if="{{scanStatus != 'share'}}">
+        <view class="scan_title" wx:if="{{firstLocate}}">开始导航前先定位</view>
+        <view class="scan_title" wx:else>继续导航前先定位</view>
+      </block>
+      <view class="erect_img">
+        <css-animation width="578" height="358" count="60" duration="2"
+          url="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/css_sprites3.png"></css-animation>
+      </view>
+      <view class="erect_tip">
+        <view>请竖起手机缓慢扫描空间</view>
+        <view wx:if="{{scanStatus == 'share'}}">定位成功即可将自己的位置发送给好友哦</view>
+        <view>对准大厅、商铺等更容易识别哦~</view>
+      </view>
+    </view>
+    <view class="bylift_content" wx:else>
+      <view class="scan_title" wx:if="{{firstLocate}}">请扫描地面完成初始化</view>
+      <view class="erect_img">
+        <css-animation width="578" height="358" count="60" duration="3"
+          url="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/vio_init_sprites.png?v=1"></css-animation>
+      </view>
+    </view>
+  </view>
+  <!-- 识别异常 -->
+  <view class="abnormal_layer" wx:if="{{showAbnormal}}">
+    <view class="abnormal_item abnormal_fail">
+      <image aria-role="button" bindtap="openAbnormalText" class="abnormal_animation"
+        src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/warning_icon.png"></image>
+      <view wx:if="{{showAbnormalText}}">持续定位失败，请对准空间定位</view>
+    </view>
+  </view>
+  <view class="abnormal_layer" wx:if="{{showAbnormalSuccess}}">
+    <view class="abnormal_item abnormal_success">
+      <image src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/success_icon.png"></image>
+      <view>定位成功</view>
+    </view>
+  </view>
+  <!-- 定位失败提示 -->
+  <view class="bylift_remind" wx:if="{{showLocateFail}}">
+    <image aria-role="button" aria-label="关闭" class="layer_close_btn" bindtap="closeLayer"
+      src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/close_icon_light.png"></image>
+    <view class="bylift_content">
+      <image class="bylift_img" src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/locate_fail.png">
+      </image>
+      <view class="bylift_tip">定位失败，换个地方试试吧</view>
+      <view aria-role="button" aria-label="重新试试" class="locate_fail_btn" bindtap="locateAgain">重新试试</view>
+    </view>
+  </view>
+  <!-- 总库定位楼层 -->
+  <view class="bylift_remind" wx:if="{{showFloorJudge}}">
+    <image aria-role="button" aria-label="关闭" class="layer_close_btn" bindtap="closeLayer"
+      src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/close_icon_light.png"></image>
+    <view class="floor_judge">
+      <view class="floor_judge_title">检测到当前楼层为</view>
+      <view class="floor_judge_floor">{{currentFloorName}}</view>
+      <view aria-role="button" aria-label="楼层正确，开始导航" bindtap="confirmBegin" class="floor_judge_btn">楼层正确，开始导航</view>
+      <view aria-role="button" aria-label="楼层不对，自己选择" bindtap="confirmSelf" class="floor_judge_btn">楼层不对，自己选择</view>
+    </view>
+  </view>
+  <!-- <hint
+    wx:if="{{showScan}}"
+    scan="{{showScan}}"
+    erect="{{erectRemind}}"
+  ></hint> -->
+  <!-- 导航信息显示 -->
+  <view class="{{navigateExit? 'popup_exit' : 'popup_info'}}" wx:if="{{navigating && (navigateInfo || byliftRemind)}}">
+    <view class="nav_exit" wx:if="{{navigateExit}}">
+      <view aria-role="button" aria-label="退出AR导航" class="exit_title" bindtap="confirmExit">退出AR导航</view>
+      <view aria-role="button" aria-label="取消" class="exit_cancel" bindtap="cancelExit">取消</view>
+    </view>
+    <view class="nav_info" wx:else>
+      <view class="nav_name">{{targetName}}</view>
+      <view class="nav_detail" wx:if="{{!navigateEnd && !byliftRemind}}">{{navigateInfo}}</view>
+      <view class="nav_detail arrive_txt" wx:if="{{navigateEnd && !byliftRemind}}">已到达目的地</view>
+      <view class="nav_detail arrive_txt" wx:if="{{byliftRemind}}">
+        <text wx:if="{{breakAction == 'Elevator'}}">直梯</text>
+        <text wx:if="{{breakAction == 'Escalator'}}">扶梯</text>
+        <text wx:if="{{breakAction == 'Stairs'}}">楼梯</text>
+        <text>附近已暂停导航</text>
+      </view>
+      <view class="nav_close_icon" bindtap="exitNav">
+        <image aria-role="button" aria-label="退出AR导航"
+          src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/close_icon.png"></image>
+      </view>
+    </view>
+  </view>
+  <!-- 当前导航楼层 -->
+  <!-- <view wx:if="{{showBackStatus}}" class="current_floor">定位中</view> -->
+  <view class="auth_layer" wx:if="{{showExit}}">
+    <view class="auth_content">
+      <view class="auth_txt auth_txt_two">
+        <view>是否退出导航？</view>
+      </view>
+      <view class="auth_btn_group">
+        <view aria-role="button" aria-label="退出" class="auth_setting_btn" bindtap="exitScan">退出</view>
+        <view aria-role="button" aria-label="取消" class="auth_exit_btn" bindtap="continueScan">取消</view>
+      </view>
+    </view>
+  </view>
+  <!-- 获取分享位置入口 -->
+  <!-- <image aria-role="button"  aria-label="分享" wx:if="{{!navigating}}" bindtap="getSharePosition" class="share_entrance" src="https://sightp-tour-cdn.sightp.com/wxapp/remote/zhangjiangYSZX/huizhiBusiness/share_location.png" mode=""/> -->
+  <!-- 反馈入口 -->
+  <image aria-role="button" aria-label="反馈" wx:if="{{!navigating && showFb}}" bindtap="goFb" class="feedback_entrance"
+    src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARMall/feedback/feedback_btn.png" mode="" />
+  <!-- 转发店铺 -->
+  <van-popup show="{{ showShopShare }}" custom-class="popup_class" z-index="150">
+    <view class="share_title">分享我的位置 </view>
+    <block wx:if="{{currentSharePoi.distance}}">
+      <view class="share_content" wx:if="{{currentSharePoi.distance <= cubeDistance}}">
+        <view class="shop_share1">
+          分享给好友即可让他开启AR导航快速来到您的身边！
+        </view>
+        <view class="shop_share2">检测到您在：<text class="shop_name_blue"> {{currentSharePoi.name}}
+          </text>附近（距您{{currentSharePoi.distance}}米）</view>
+      </view>
+      <view class="share_content" wx:else>
+        <view class="shop_share1">
+          <view>定位成功！</view>
+          <view>分享给好友即可让他开启AR导航快速来到您的身边！</view>
+        </view>
+      </view>
+    </block>
+    <view class="share_content" wx:else>
+      <view class="shop_share1">
+        分享<text class="shop_name_blue"> {{currentSharePoi.name}} </text>位置
+      </view>
+      <view class="shop_share2">分享给好友即可让他开启AR导航前往该商铺！</view>
+    </view>
+    <view class="share_btn_group">
+      <view aria-role="button" aria-label="位置错误重新定位" wx:if="{{currentSharePoi.distance}}" class="cancel_btn cancel_btn2"
+        bindtap="againSharePosition">位置错误重新定位</view>
+      <view aria-role="button" aria-label="取消" wx:else class="cancel_btn" bindtap="openShopShare">取消</view>
+      <view class="share_btn">
+        <text>转发给朋友</text>
+        <button class="share_button" data-type="shop" open-type="share"></button>
+      </view>
+    </view>
+    <image aria-role="button" aria-label="关闭分享" bindtap="openShopShare" class="share_popup_close"
+      src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/share_popup_close.png" mode="" />
+  </van-popup>
+  <!-- 从分享进入 -->
+  <van-popup show="{{ showAcceptShare }}" custom-class="popup_class" z-index="150">
+    <view class="share_content">
+      <view class="shop_share1" wx:if="{{!acceptPoi.distance}}">
+        你的好友给你分享了<text class="shop_name_blue"> {{acceptPoi.name}} </text>位置，是否前往？
+      </view>
+      <block wx:else>
+        <view class="shop_share1" wx:if="{{acceptPoi.distance <= cubeDistance}}">
+          你的好友在{{mallName}}{{acceptPoi.realName}}附近{{acceptPoi.distance}}米等你，是否前往好友所在位置？
+        </view>
+        <view class="shop_share1" wx:else>
+          你的好友在{{mallName}}等你，是否前往好友所在位置？
+        </view>
+      </block>
+    </view>
+    <view class="share_btn_group">
+      <view aria-role="button" aria-label="暂不前往" class="cancel_btn" bindtap="openAcceptShare">暂不前往</view>
+      <view aria-role="button" aria-label="立即前往" class="share_btn" bindtap="goAcceptPoi">立即前往</view>
+    </view>
+  </van-popup>
+  <!-- 不支持vk v2提示 -->
+  <vk-hint wx:if="{{showVkHint}}" type="{{vkHintType}}"></vk-hint>
+</view>
+<image style="display: none;" src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/css_sprites3.png">
+</image>
+<audio src="{{currentAudio}}"></audio>
+
+<!-- <canvas type="2d" id="shotCanvas" style="width: 300px; height: 500px;"></canvas> -->
+<poster width="{{posterWidth}}" height="{{posterHeight}}" pixekRatio="{{pixekRatio}}" sourceParams="{{posterSources}}"
+  save="{{save}}" bind:start="onPosterStart" bind:finish="onPosterFinish" bind:fail="onPosterFail" bind:saveTemp="onPosterSaveTemp" bind:saved="onPosterSaved" bind:saveError="onPosterSaveError"
+></poster>

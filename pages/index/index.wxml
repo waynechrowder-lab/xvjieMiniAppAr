@@ -1,0 +1,169 @@
+<view
+  class="page"
+>
+  <!-- 地图容器：只负责承载地图，不放 UI -->
+  <view class="map-container"
+  bindtouchstart="onTouchStart"
+  bindtouchmove="onTouchMove"
+  bindtouchend="onTouchEnd"
+  bindtouchcancel="onTouchEnd"
+  >
+    <view
+      class="map-inner"
+      style="transform: translate3d({{translateX}}px, {{translateY}}px, 0) scale({{scale}});"
+    >
+      <!-- 兜底大图 -->
+      <image class="map-img" src="../assets/map.jpg" mode="aspectFill"></image>
+
+      <!-- 高清切片 -->
+      <block wx:if="{{showHdTiles}}" wx:for="{{tileList}}" wx:key="id" visable>
+        <image
+          class="map-tile"
+          src="{{item.src}}"
+          mode="aspectFill"
+          style="left: {{item.left}}px; top: {{item.top}}px; width: {{item.width}}px; height: {{item.height}}px; opacity: {{item.loaded ? 1 : 0}};"
+          bindload="onTileLoad"
+          data-id="{{item.id}}"
+        />
+      </block>
+<!-- POI -->
+<block wx:for="{{poiList}}" wx:key="id">
+  <view
+    wx:if="{{item.visible}}"
+    class="poi"
+    style="left: {{item.x * 100}}%; top: {{item.y * 100}}%; transform: translate(-50%, -100%) scale({{1 / scale}});"
+    data-id="{{item.id}}"
+    bindtap="onTapPoi"
+  >
+  <view class="poi-body {{item.arrived !== 2 ? 'poi-body-not-arrived' : ''}}">
+      <image
+        class="poi-bg" mode="scaleToFill"
+        src="{{ item.arrived === 2 ? poi_bg : poi_bg_not }}"
+        />
+        <view class="poi-label">
+        <block wx:if="{{item.arrived === 2}}">
+          <block wx:for="{{item.nameChars}}" wx:key="*this">
+          <text>{{item}}</text>
+        </block>
+        </block>
+        <block wx:if="{{item.arrived !== 2}}">
+          <block wx:for="{{item.nameChars}}" wx:key="*this">
+          <text class="poi-label-text-not">{{item}}</text>
+        </block>
+        </block>
+      </view>
+    </view>
+
+    <view wx:if="{{item.arrived === 2}}" class="poi-pin">
+      <image
+        class="poi-point"
+        src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/main/poi-point.png"
+        mode="scaleToFill"
+      ></image>
+    </view>
+  </view>
+</block>
+
+
+
+    </view>
+  </view>
+
+  <!-- ❗ 下面这些都要写在 map-inner 外面 ❗ -->
+
+  <!-- 顶部 logo -->
+  <view class="header">
+    <image
+  class="header-bg"
+  src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/main/head.png"
+  mode="aspectFill"
+></image>
+    <image class="logo" src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/main/logo.png" mode="heightFix"></image>
+  </view>
+
+  <!-- 分类条 -->
+  <view class="category-bar">
+    <block wx:for="{{categoryList}}" wx:key="id">
+      <view
+        class="category-item {{item.active ? 'category-item-active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onToggleCategory"
+      >
+      <image 
+      class="category-img"
+      src="{{item.active ? item.imgActive : item.img}}"
+      mode="aspectFit"
+      >
+        <text class="category-text-line">{{item.line1}}</text>
+        <text class="category-text-line">{{item.line2}}</text>
+      </image>
+      </view>
+    </block>
+  </view>
+
+<!-- 详情弹窗 -->
+<view wx:if="{{showPopup}}" class="popup-mask" catchtap="onMaskTap">
+  <view class="popup" catchtap="onPopupTap">
+  <image
+    class="popup-bg"
+    src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/main/introPanel.png"
+    mode="aspectFit"
+  />
+  <view class="popup-close" bindtap="onClosePopup">✕</view>
+    <view class="popup-header">
+      <text class="popup-title">{{currentPoi.name}}</text>
+    </view>
+
+    <!-- 文本区域，可滚动 -->
+    <scroll-view class="popup-content" scroll-y="true">
+      <text class="popup-desc">{{currentPoi.description}}</text>
+    </scroll-view>
+
+    <!-- 固定比例的封面区域 -->
+    <view class="popup-cover">
+      <image class="popup-cover-img"
+             src="{{currentPoi.coverImage}}"
+             mode="aspectFill" />
+    </view>
+
+    <!-- 底部按钮 -->
+    <view class="popup-btn-row">
+      <view class="popup-btn" bindtap="onStartNav">
+        开始导航
+      </view>
+    </view>
+
+  </view>
+</view>
+
+  <!-- 底部 Tab -->
+  <view class="tabbar">
+    <view
+      class="tab-item {{currentTab === 'checkin' ? 'tab-item-active' : ''}}"
+      data-tab="checkin"
+      bindtap="onChangeTab"
+    >
+      <!-- <image class="tab-icon" src="../assets/tab_checkin.png" mode="aspectFit"></image> -->
+      <text class="tab-label">AR打卡</text>
+    </view>
+
+    <view
+      class="tab-item {{currentTab === 'home' ? 'tab-item-active' : ''}}"
+      data-tab="home"
+      bindtap="onChangeTab"
+    >
+      <!-- <image class="tab-icon" src="../assets/tab_home.png" mode="aspectFit"></image> -->
+      <text class="tab-label">主页</text>
+    </view>
+
+    <view
+      class="tab-item {{currentTab === 'history' ? 'tab-item-active' : ''}}"
+      data-tab="history"
+      bindtap="onChangeTab"
+    >
+      <!-- <image class="tab-icon" src="../assets/tab_history.png" mode="aspectFit"></image> -->
+      <text class="tab-label">AR访古</text>
+    </view>
+  </view>
+
+</view>

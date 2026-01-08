@@ -1,0 +1,24 @@
+<view style="position: relative; width: 100vw; height: 100vh; overflow: hidden;">
+  <clsvkclient
+    wx:if="{{showVkClient}}"
+    includePerf="{{true}}"
+    wxapi="{{wxapi}}"
+    clsConfig="{{clsConfig}}"
+    serverConfig="{{serverConfig}}"
+    autoLocate="{{autoLocate}}"
+    multiMapSetting="{{multiMapSetting}}"
+    bind:load="onClsVKClientLoad"
+    bind:result="onClsVKClientResult"
+    bind:resize="onResize"
+    bind:error="onClsClientError"
+    debug="{{vkDebug}}"
+    enhanceDevtools="{{enhanceDevtools}}"
+    fackDataConfig="{{fackDataConfig}}"
+    allowRecordingMpose="{{false}}"
+    running="{{running}}"
+    enableAR="{{enableAR}}"
+    enablePC="{{true}}"
+    force3Dof="{{false}}"
+    blacklist="{{blacklist}}"
+    minInterval="{{minInterval}}"/>
+</view>

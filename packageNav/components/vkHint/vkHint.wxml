@@ -1,0 +1,33 @@
+<!-- 是否支持vk提示 -->
+<view class="auth_layer" wx:if="{{showVKno}}">
+  <view aria-role="alert" class="hint_content">
+    <view class="hint_title">温馨提示</view>
+    <view class="hint_txt">
+      <view>您的手机（{{phoneModel}}）暂不支持数字人导航功能，且导航体验可能有限，正在全力研发优化中，敬请期待~</view>
+    </view>
+    <view aria-role="button" aria-label="确定"  class="hint_btn" bindtap="closeVKno">
+      确 定
+      <!-- <view class="end_info_btn" bindtap="closeEndInfo">确 定</view> -->
+    </view>
+    <view class="hint_operate">
+      <view></view>
+      <!-- <view class="hint_check" bindtap="checkHint">
+        <image wx:if="{{!hintCheck}}" class="check_no" src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/nanchangxizhan/check_no.png"></image>
+        <image wx:else class="check_yes" src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/nanchangxizhan/check_yes.png"></image>
+        <text>不再提示</text>
+      </view> -->
+      <view aria-role="button" aria-label="查看支持机型" class="hint_view_btn" bindtap="openVKModel">查看支持机型</view>
+    </view>
+  </view>
+</view>
+<view class="auth_layer" wx:if="{{showVKModel}}">
+  <view class="hint_content">
+    <view class="hint_title">数字人导航支持机型</view>
+    <view class="hint_txt">
+      <view>目前安卓端支持<text class="hint_bold">华为小米等国产品牌部分机型</text>（后续会逐步增加其他品牌机型），IOS端支持<text class="hint_bold">iPhone7及以上</text>机型。</view>
+    </view>
+    <view aria-role="button" aria-label="确定"  class="hint_btn" bindtap="closeVKModel">
+      确 定
+    </view>
+  </view>
+</view>

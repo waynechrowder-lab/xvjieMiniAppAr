@@ -1,0 +1,193 @@
+<view class="page">
+
+<!-- 顶部标题 + 玩法介绍 -->
+<view class="ar-header">
+<image
+  class="ar-header-bg"
+  src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/checkin/top-area.png"
+  mode="aspectFill"
+></image>
+  <view class="ar-header-title-row">
+    <text class="ar-header-title">AR打卡</text>
+
+    <view class="ar-header-desc">
+    <text>1. 走到古城指定区域，触发 AR 虚拟模型。</text>
+    <text>2. 点击“拍照”完成留影，收集打卡徽章。</text>
+    <text>3. 完成全部打卡点后，可领取纪念徽章。</text>
+  </view>
+  </view>
+
+
+</view>
+
+<!-- 打卡进度卡片 -->
+<view class="progress-card">
+  <view class="progress-card-inner">
+    <!-- 中间淡黄色区域 -->
+    <view class="progress-panel">
+      <!-- 第1行：左文字 + 右百分比 -->
+      <view class="progress-panel-row{{progressPercent === 100 ? '-full' : ''}}">
+        <text class="progress-label">打卡完成进度</text>
+        <text class="progress-percent">{{progressPercent}}%</text>
+      </view>
+
+      <!-- 第2行：进度条 + 右侧“领取纪念图”按钮 -->
+      <view class="progress-bar-row">
+        <view class="progress-bar-bg{{progressPercent === 100 ? '-full' : ''}}">
+          <view class="progress-bar-fill" style="width: {{progressPercent}}%;"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 左侧头像，压在淡黄色区域前面 -->
+    <view class="progress-avatar">
+      <image class="progress-avatar-img" src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/checkin/avatar.png" mode="aspectFill" />
+    </view>
+
+    <!-- 只有 100% 时才显示 -->
+    <view wx:if="{{progressPercent === 100}}" class="progress-award">    
+      <image
+        class="progress-award-img"
+        src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/checkin/checkinIcon.png"
+        mode="aspectFit"
+        bindtap="onGetReward"
+      />
+    </view>
+  </view>
+</view>
+
+
+<!-- 打卡点位标题 -->
+<view class="section-header">
+  <text class="section-title">打卡点位</text>
+</view>
+
+<!-- 列表滚动区域：从“打卡点位”下面开始 -->
+<scroll-view class="checkin-scroll" scroll-y="true">
+  <block wx:for="{{checkinPoiList}}" wx:key="id">
+  <view class="checkin-card" bindtap="onTapCheckinCard" data-id="{{item.id}}">
+    <!-- 背景封面图：占满整张卡片 -->
+    <image class="checkin-card-bg" src="{{item.status === 'done' ? item.checkinCover : item.uncheckinCover}}" mode="aspectFill" />
+
+    <!-- 内容层：左信息条 + 右上状态 -->
+    <view class="checkin-card-content">
+
+      <!-- 左侧渐变信息条 -->
+      <view class="checkin-card-left">
+        <text class="checkin-index">{{item.displayIndex}}</text>
+        <text class="checkin-name">{{item.name}}</text>
+        <text class="checkin-tip">点击查看详情</text>
+      </view>
+
+      <!-- 右上角状态块（白色圆角底，内部图片+文字） -->
+      <view class="checkin-status-wrapper">
+        <view class="checkin-status-box">
+          <image class="checkin-status-icon" src="{{ item.status === 'done' ? item.checkinIcon : item.uncheckinIcon }}" mode="widthFix" />
+          <view class="checkin-status-text-bg {{ item.status === 'todo' ? 'checkin-status-text-bg-todo' : 'checkin-status-text-bg-done' }}">
+            <text class="checkin-status-text">
+              {{ item.status === 'done' ? '已打卡' : '去打卡' }}
+            </text>
+          </view>
+          </view>
+      </view>
+
+    </view>
+  </view>
+  </block>
+
+  <!-- 为了不被底部 tabbar 遮挡，加一点空白 -->
+  <view class="scroll-bottom-space"></view>
+</scroll-view>
+
+<!-- 详情弹窗 -->
+<view wx:if="{{showPopup}}" class="popup-mask" catchtap="onMaskTap">
+  <view class="popup" catchtap="onPopupTap">
+    <image
+    class="popup-bg"
+    src="https://shanghai-mashu-wxapp.oss-cn-shanghai.aliyuncs.com/ui/zhengding/checkin/introPanel.png"
+  />
+
+  <view class="popup-close" bindtap="onClosePopup">✕</view>
+    <view class="popup-header">
+      <text class="popup-title">{{currentPoi.name}}</text>
+    </view>
+
+        <!-- 固定比例的封面区域 -->
+        <view class="popup-cover">
+      <image class="popup-cover-img"
+             src="{{currentPoi.coverImage}}"
+             mode="aspectFill" />
+    </view>
+
+    <!-- 文本区域，可滚动 -->
+    <scroll-view class="popup-content" scroll-y="true">
+      <text class="popup-desc">{{currentPoi.description_checkin}}</text>
+      <text class="popup-desc-tip">
+      【在附近点击“AR打卡”；前往该地点点击“开始AR导航”】
+    </text>
+    </scroll-view>
+
+    <!-- 底部按钮 -->
+    <view class="popup-btn-row">
+      <view class="popup-btn-left" bindtap="onCheckin">
+        AR 打卡
+      </view>
+      <view class="popup-btn-right" bindtap="onStartNav">
+        开始AR导航
+      </view>
+    </view>
+
+  </view>
+</view>
+
+<!-- 奖励弹窗 -->
+<view wx:if="{{showAward}}" class="popup-mask" catchtap="onMaskTap">
+  <view class="popup-award" catchtap="onPopupTap">
+    <view class="popup-header-award">
+
+    </view>
+
+    <!-- 固定比例的封面区域 -->
+    <view class="popup-cover-img-award"></view>
+
+    <!-- 底部按钮 -->
+    <view class="popup-btn-row">
+      <view class="popup-btn-award" bindtap="onSaveToLocal">
+      
+      </view>
+    </view>
+
+  </view>
+</view>
+
+<!-- 底部标签栏（单选） -->
+<view class="tabbar">
+  <view
+    class="tab-item {{currentTab === 'checkin' ? 'tab-item-active' : ''}}"
+    data-tab="checkin"
+    bindtap="onChangeTab"
+  >
+
+    <text class="tab-label">AR打卡</text>
+  </view>
+
+  <view
+    class="tab-item {{currentTab === 'home' ? 'tab-item-active' : ''}}"
+    data-tab="home"
+    bindtap="onChangeTab"
+  >
+
+    <text class="tab-label">主页</text>
+  </view>
+
+  <view
+    class="tab-item {{currentTab === 'history' ? 'tab-item-active' : ''}}"
+    data-tab="history"
+    bindtap="onChangeTab"
+  >
+
+    <text class="tab-label">AR访古</text>
+  </view>
+</view>
+
+</view>

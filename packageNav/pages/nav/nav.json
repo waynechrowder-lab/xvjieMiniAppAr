@@ -1,0 +1,14 @@
+{
+  "usingComponents": {
+    "clsvk": "../clsvk/clsvk",
+    "hint": "../../components/hint/hint",
+    "vk-hint": "../../components/vkHint/vkHint",
+    "css-animation":"../../components/css-animation/index",
+    "van-swipe-cell": "vant-weapp/swipe-cell/index",
+    "van-popup": "vant-weapp/popup/index",
+    "poster":"../../components/poster/poster"
+	},
+	"navigationBarTitleText": "",
+  "navigationStyle":"default",
+  "disableScroll": true
+}

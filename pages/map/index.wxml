@@ -1,0 +1,50 @@
+<view
+  class="page"
+  catchtouchstart="onTouchStart"
+  catchtouchmove="onTouchMove"
+  catchtouchend="onTouchEnd"
+  catchtouchcancel="onTouchEnd"
+>
+  <!-- 地图容器：整屏 -->
+  <view class="map-container">
+    <!-- 这里用 transform 做平移 + 缩放 -->
+    <view
+      class="map-inner"
+      style="transform: translate3d({{translateX}}px, {{translateY}}px, 0) scale({{scale}});"
+    >
+  <!-- 1. 兜底低清整图 -->
+  <image class="map-img" src="../assets/map.jpg" mode="aspectFill"></image>
+  <!-- 2. 高清切片：放在兜底图上面 -->
+  <block wx:if="{{showHdTiles}}" wx:for="{{tileList}}" wx:key="id">
+  <image
+    class="map-tile"
+    src="{{item.src}}"
+    mode="aspectFill"
+    style="left: {{item.left}}px; top: {{item.top}}px; width: {{item.width}}px; height: {{item.height}}px; opacity: {{item.loaded ? 1 : 0}};"
+    bindload="onTileLoad"
+    data-id="{{item.id}}"
+  />
+</block>
+
+      <!-- 点位（如果你已经有 POI_LIST，可以沿用之前的写法） -->
+      <block wx:for="{{poiList}}" wx:key="id">
+        <view
+          wx:if="{{item.visible}}"
+          class="poi"
+          style="left: {{item.x * 100}}%; top: {{item.y * 100}}%;"
+          data-id="{{item.id}}"
+          bindtap="onTapPoi"
+        >
+          <view class="poi-label">
+            <block wx:for="{{item.nameChars}}" wx:key="*this">
+              <text>{{item}}</text>
+            </block>
+          </view>
+          <view class="poi-pin"></view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 你后面可以把头部、分类、底部 tab 全部用 position:fixed 浮在上面 -->
+</view>

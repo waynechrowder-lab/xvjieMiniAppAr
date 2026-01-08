@@ -1,0 +1,151 @@
+<!--packageNav/components/parking-popup/index.wxml-->
+<view class="mask" wx:if="{{(!parkingFold && activeTab == 'stall') || (!parkingFold && activeTab == 'plate')}}" bindtap="maskTap"></view>
+<!-- plateReady: false时，弹层是展开状态 TODO -->
+<view class="parking_popup {{!parkingFold && activeTab == 'plate' ? 'popup_plate_height' : ''}}" hidden="{{navigating}}">
+  <view
+    class="parking_main {{(!parkingFold && activeTab == 'stall') || (!parkingFold && activeTab == 'plate' && plateReady) ? 'parking_main_unfold' : (activeTab == 'stall' ? 'stall_height' : '')}} {{tabStatus == 'all' && activeTab == 'plate' && !plateReady ? 'plate_height' : ''}} {{tabStatus == 'plate' && activeTab == 'plate' && !plateReady ? 'plate_height_two' : ''}}"
+    >
+    <view class="parking_name" bindtap="parkingPopupOpen">
+      <image class="parking_name_icon" src="https://sightp-tour-cdn.sightp.com/wxapp/remote/zhangjiangYSZX/huizhiBusiness/target_location.png" mode=""/>
+      <text>{{activeBuildingName}}</text>
+    </view>
+    <view class="parking_tab" wx:if="{{tabStatus == 'all'}}">
+      <view class="parking_tab_item {{activeTab == 'plate' ? 'parking_active_tab' : ''}}" bindtap="slectTab" data-key="plate">按车牌搜索</view>
+      <view class="parking_tab_item {{activeTab == 'stall' ? 'parking_active_tab' : ''}}" bindtap="slectTab" data-key="stall">按车位搜索</view>
+    </view>
+    <!-- 车牌号导航 -->
+    <block wx:if="{{activeTab == 'plate'}}">
+      <view class="plate_number">输入车牌号</view>
+      <view class="plate_number_input">
+        <view class="num_province" bindtap="openProvince">{{carProvince}}</view>
+        <view class="num_code" bindtap="openNum">{{carNumArr[0] || ''}}</view>
+        <view class="num_detail" bindtap="openNum">{{carNumArr[1] || ''}}</view>
+        <view class="num_detail" bindtap="openNum">{{carNumArr[2] || ''}}</view>
+        <view class="num_detail" bindtap="openNum">{{carNumArr[3] || ''}}</view>
+        <view class="num_detail" bindtap="openNum">{{carNumArr[4] || ''}}</view>
+        <view class="num_detail" bindtap="openNum">{{carNumArr[5] || ''}}</view>
+        <view class="num_detail" bindtap="openNum" wx:if="{{numLengthLimit > 6}}">{{carNumArr[6] || ''}}</view>
+        <view class="num_plus" wx:else bindtap="addNumPlace">
+          <text class="num_plus_one">+</text>
+          <text class="num_plus_two">新能源</text>
+        </view>
+      </view>
+      <view class="plate_result" wx:if="{{plateReady && plateRes}}">
+        <view class="plate_result_label">匹配结果：</view>
+        <!-- <view class="plate_result_val">主楼 > B1 > E区 > 沪A138678</view> -->
+        <view class="plate_result_val">{{mapName}} > {{parkingSpaceNumber}}</view>
+        <view class="plate_start" bind:tap="selectPlate">开始AR寻车</view>
+      </view>
+      <view class="plate_result_no" wx:if="{{plateReady && !plateRes}}">未找到匹配结果，请输入真实有效的车牌号，否则将无法正常使用AR寻车功能</view>
+    </block>
+    <!-- 车位号导航 -->
+    <block wx:else>
+      <view class="stall_input_label" wx:if="{{tabStatus == 'stall'}}" bindtap="parkingPopupOpen">输入车位号</view>
+      <view class="stall_input_content">
+        <view class="input_view {{showSearch ? 'input_view_search' : ''}}">
+          <image class="search_icon" src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/search_icon.png"></image>
+          <input
+            class="stall_input"
+            type="text"
+            adjust-position="{{false}}"
+            value="{{searchVal}}"
+            placeholder="搜索车位号"
+            bindinput="searchInput"
+            bindfocus="searchFocus"
+            bindtap="searchTap"
+          />
+          <image wx:if="{{searchVal}}" bindtap="searchClear" class="search_close_icon" src="https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/ARNav/search_close_icon.png"></image>
+        </view>
+        <view wx:if="{{showSearch}}" bindtap="searchCancel" class="search_cancel">取消</view>
+      </view>
+      <block wx:if="{{!showSearch}}">
+        <view class="stall_building">
+          <view class="building_label">定位</view>
+          <view class="building_list">
+            <view class="building_item {{activeBuilding == item.key ? 'building_select' : ''}}" wx:for="{{buildingList}}" wx:key="index" bindtap="selectBuilding" data-index="{{index}}">{{item.value}}</view>
+          </view>
+        </view>
+        <view class="stall_building">
+          <view class="building_label">停车场</view>
+          <view class="building_list">
+            <view class="building_item {{activeFloor == item.key ? 'building_select' : ''}}" wx:for="{{floorList}}" wx:key="index" bindtap="selectFloor" data-key="{{item.key}}">{{item.value}}</view>
+          </view>
+        </view>
+        <view class="stall_building">
+          <view class="building_label">分区</view>
+          <view class="building_list">
+            <view class="building_item {{activeTag == '' ? 'building_select' : ''}}" bindtap="selectTag" data-key="">全部</view>
+            <view class="building_item {{activeTag == item.key ? 'building_select' : ''}}" wx:for="{{tags}}" wx:key="index" bindtap="selectTag" data-key="{{item.key}}">{{item.value}}</view>
+          </view>
+        </view>
+        <scroll-view
+          id="scrollview"
+          class="stall_list_filter"
+          scroll-y="true"
+          bindscrolltolower="scrollToLower"
+          enhanced="true"
+        >
+          <block wx:for="{{shopList}}" wx:key="id">
+            <view class="stall_item" wx:if="{{index < stallLength}}">
+              <view class="stall_num">{{item.name}}</view>
+              <view class="stall_btn" bindtap="selectShop" data-poi="{{item}}">AR导航</view>
+            </view>
+          </block>
+        </scroll-view>
+      </block>
+      <view wx:else class="stall_search_list">
+        <block wx:for="{{searchRes}}" wx:key="index">
+          <block wx:for="{{item.floorList}}" wx:for-item="item2" wx:for-index="index2" wx:key="index2">
+            <block wx:for="{{item2.sortList}}" wx:for-item="item3" wx:for-index="index3" wx:key="index3">
+              <block wx:if="{{item3.shopList.length}}">
+                <view class="stall_list_title">
+                  <text wx:if="{{searchRes.length > 1}}">{{item.value}}></text>
+                  <text>{{item2.value}}>{{item3.value}}</text>
+                </view>
+                <block wx:for="{{item3.shopList}}" wx:for-item="item4" wx:for-index="index4" wx:key="index4">
+                  <view class="stall_list">
+                    <view class="stall_item">
+                      <view class="stall_num">{{item4.name}}</view>
+                      <view class="stall_btn" bindtap="selectShop" data-poi="{{item4}}">AR导航</view>
+                    </view>
+                  </view>
+                </block>
+              </block>
+            </block>
+          </block>
+        </block>
+      </view>
+    </block>
+  </view>
+  <view class="keyboard_province" wx:if="{{!parkingFold && activeTab == 'plate' && !plateReady && provinceKeyboard}}">
+    <view class="province_view">
+      <block wx:for="{{province}}" wx:key="index">
+        <view wx:if="{{index < 10}}" class="keyboard_item" bindtap="selectProvince" data-val="{{item}}">{{item}}</view>
+      </block>
+    </view>
+    <view class="province_view">
+      <block wx:for="{{province}}" wx:key="index">
+        <view wx:if="{{index > 9 && index < 19}}" class="keyboard_item" bindtap="selectProvince" data-val="{{item}}">{{item}}</view>
+      </block>
+    </view>
+    <view class="province_view">
+      <block wx:for="{{province}}" wx:key="index">
+        <view wx:if="{{index > 18 && index < 26}}" class="keyboard_item" bindtap="selectProvince" data-val="{{item}}">{{item}}</view>
+      </block>
+    </view>
+    <view class="province_view">
+      <block wx:for="{{province}}" wx:key="index">
+        <view wx:if="{{index > 25}}" class="keyboard_item" bindtap="selectProvince" data-val="{{item}}">{{item}}</view>
+      </block>
+      <view class="keyboard_del" bindtap="delProvince">
+        <image src="https://sightp-tour-cdn.sightp.com/wxapp/hangzhoudahuizhan/parking/del_icon.png" mode=""/>
+      </view>
+    </view>
+  </view>
+  <view class="keyboard_num" wx:if="{{!parkingFold && activeTab == 'plate' && !plateReady && numKeyboard}}">
+    <view wx:for="{{keyboard}}" wx:key="index" class="keyboard_item" bindtap="selectNum" data-val="{{item}}">{{item}}</view>
+    <view class="keyboard_del" bindtap="delNum">
+      <image src="https://sightp-tour-cdn.sightp.com/wxapp/hangzhoudahuizhan/parking/del_icon.png" mode=""/>
+    </view>
+  </view>
+</view>
