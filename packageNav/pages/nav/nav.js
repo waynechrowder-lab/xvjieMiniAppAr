@@ -1562,6 +1562,7 @@ Page({
 		})
 	},
 	takePic() {
+    const cameraContext =  wx.createCameraContext()
     const info = wx.getWindowInfo()
 		console.log('has take');
     this.setData({
@@ -1570,6 +1571,7 @@ Page({
       posterSources: [
         {
           type: "camera",
+          cameraContext:cameraContext,
           x: 0,
           y: 0,
           w: this.data.posterWidth,
