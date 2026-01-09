@@ -424,6 +424,7 @@
 <audio src="{{currentAudio}}"></audio>
 
 <!-- <canvas type="2d" id="shotCanvas" style="width: 300px; height: 500px;"></canvas> -->
-<poster width="{{posterWidth}}" height="{{posterHeight}}" pixekRatio="{{pixekRatio}}" sourceParams="{{posterSources}}"
+<!-- wx:if="{{isSave}}" -->
+<poster wx:if="{{isSave}}" width="{{posterWidth}}" height="{{posterHeight}}" pixelRatio="{{pixelRatio}}" sourceParams="{{posterSources}}"
   save="{{save}}" bind:start="onPosterStart" bind:finish="onPosterFinish" bind:fail="onPosterFail" bind:saveTemp="onPosterSaveTemp" bind:saved="onPosterSaved" bind:saveError="onPosterSaveError"
 ></poster>

@@ -1,4 +1,5 @@
 import { IS_DEVTOOLS } from '../../utils/util';
+
 // 从插件中引入
 const {RoadServer, loadScriptFromString, tinyAllinone } = requirePlugin('SPARPlugin');
 // 从插件 tinyAllinone 对象引入需要使用的对象
@@ -252,6 +253,7 @@ Component({
 			this.annotations = this.ema.annotations;
 			console.log("arannotations:",this.annotations);
 
+      console.log("this.pcCtx.app;",this.pcCtx.app.graphicsDevice.gl,ARManager.instance)
       wxapp.globalData.poster.photoApp = this.pcCtx.app;
       wxapp.globalData.poster.photoManager = ARManager.instance;
 
@@ -452,37 +454,38 @@ Component({
     },
     //获取ar画面
     takeARSnapshot({ ext = 'jpg', quality = 0.85 } = {}) {
-      return new Promise((resolve, reject) => {
-        if (!this._app3d || !this._canvas3d) {
-          return reject(new Error('AR Canvas 未就绪'))
-        }
+      console.log("takeARSnapshot",ARManager.instance.clsClient.takePhoto())
+      // return new Promise((resolve, reject) => {
+      //   if (!this._app3d || !this._canvas3d) {
+      //     return reject(new Error('AR Canvas 未就绪'))
+      //   }
     
-        // 等一帧，保证截到最新画面（postrender）
-        const handler = () => {
-          try {
-            this._app3d.off?.('postrender', handler)
+      //   // 等一帧，保证截到最新画面（postrender）
+      //   const handler = () => {
+      //     try {
+      //       this._app3d.off?.('postrender', handler)
     
-            const mime = ext === 'png' ? 'image/png' : 'image/jpeg'
-            const dataUrl = this._canvas3d.toDataURL(mime, quality)
-            const base64 = dataUrl.split(',').pop()
-            // console.log('base64:',base64)
-            if (!base64) throw new Error('toDataURL 失败')
+      //       const mime = ext === 'png' ? 'image/png' : 'image/jpeg'
+      //       const dataUrl = this._canvas3d.toDataURL(mime, quality)
+      //       const base64 = dataUrl.split(',').pop()
+      //       // console.log('base64:',base64)
+      //       if (!base64) throw new Error('toDataURL 失败')
     
-            const filePath = `${wx.env.USER_DATA_PATH}/ar_${Date.now()}.${ext}`
-            wx.getFileSystemManager().writeFile({
-              filePath,
-              data: base64,
-              encoding: 'base64',
-              success: () => resolve(filePath),
-              fail: reject
-            })
-          } catch (e) {
-            reject(e)
-          }
-        }
+      //       const filePath = `${wx.env.USER_DATA_PATH}/ar_${Date.now()}.${ext}`
+      //       wx.getFileSystemManager().writeFile({
+      //         filePath,
+      //         data: base64,
+      //         encoding: 'base64',
+      //         success: () => resolve(filePath),
+      //         fail: reject
+      //       })
+      //     } catch (e) {
+      //       reject(e)
+      //     }
+      //   }
     
-        this._app3d.on('postrender', handler)
-      })
+      //   this._app3d.on('postrender', handler)
+      // })
     },
     
 

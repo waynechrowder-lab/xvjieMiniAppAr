@@ -81,7 +81,7 @@ Page({
     showCheckin: false,
     posterWidth: 300,
     posterHeight: 300,
-    pixekRatio: 1,
+    pixelRatio: 1,
     posterSources: null,
     save: false,
   },
@@ -106,11 +106,6 @@ Page({
     this.audio = wx.createInnerAudioContext()
     this.audio.obeyMuteSwitch = false
     this.audio.autoplay = false
-
-    this.setData({
-      posterWidth: 630 * info.windowWidth / 750,
-      posterHeight: (980 * info.windowHeight) / 750,
-    })
 
     // ✅ 事件只绑定一次
     this.audio.onPlay(() => this.setData({ playing: true }))
@@ -257,6 +252,14 @@ Page({
     })
     this.initMallData()
     this.debounceSearch = this.debounce(this.shopSearch, 200)
+
+    this.setData({
+      posterWidth: 630 * info.windowWidth / 750,
+      posterHeight: (980 * info.windowHeight) / 750,
+      pixelRatio: info.pixelRatio,
+
+    })
+
 
 
   },
@@ -879,9 +882,9 @@ Page({
   onPositionUpdate(distance) {
     if (this.data.myModule === 'arCheckin') {
       // if (distance <= ENTER_DIST) {
-        this.setData({
-          showTakePhoto: true
-        })
+      this.setData({
+        showTakePhoto: true
+      })
       // }
       // else {
       //   this.setData({
@@ -961,6 +964,7 @@ Page({
     }
 
     console.log("拍照")
+    // await this.clsvk.takeARSnapshot()
     this.takePic()
 
     // try {
@@ -989,17 +993,20 @@ Page({
   noop() { },
 
   saveCheckin() {
-    const filePath = this.data.checkinImage
-    if (!filePath) return
+    // const filePath = this.data.checkinImage
+    // if (!filePath) return
 
-    wx.saveImageToPhotosAlbum({
-      filePath,
-      success: () => wx.showToast({ title: '已保存到相册' }),
-      fail: (err) => {
-        console.warn(err)
-        wx.showToast({ title: '保存失败（检查相册权限）', icon: 'none' })
-        wx.openSetting()
-      }
+    // wx.saveImageToPhotosAlbum({
+    //   filePath,
+    //   success: () => wx.showToast({ title: '已保存到相册' }),
+    //   fail: (err) => {
+    //     console.warn(err)
+    //     wx.showToast({ title: '保存失败（检查相册权限）', icon: 'none' })
+    //     wx.openSetting()
+    //   }
+    // })
+    this.setData({
+      save:true
     })
   },
 
@@ -1462,120 +1469,117 @@ Page({
   },
 
   onPosterStart: function () {
-		console.log("onPosterStart");
-		wx.showLoading({ title: "拍照中", mask: true });
-	},
-	onPosterFinish: function () {
-		console.log("onPosterFinish");
-		// wx.hideLoading();
-	},
-	onPosterFail: function (e) {
-		console.log("onPosterFail", e);
-		this.setData({
-			showTakePhoto: true
-		})
-	},
-	onPosterSaveTemp: function (e) {
-		console.log("onPosterSaveTemp", e.detail);
-		wx.hideLoading();
-		this.setData({
-			posterSources: null,
-			photo: e.detail,
-			showPhotoLayer: true,
-		});
-	},
-	onPosterSaved: function () {
-		wx.showToast({ title: "保存成功" });
-	},
-	onPosterSaveError: function () {
-		wx.showToast({ title: "保存失败", icon: "none"});
-	},
+    console.log("onPosterStart");
+    wx.showLoading({ title: "拍照中", mask: true });
+  },
+  onPosterFinish: function () {
+    console.log("onPosterFinish");
+    // wx.hideLoading();
+  },
+  onPosterFail: function (e) {
+    console.log("onPosterFail", e);
+    this.setData({
+      showTakePhoto: true
+    })
+  },
+  onPosterSaveTemp: function (e) {
+    console.log("onPosterSaveTemp", e.detail);
+    wx.hideLoading();
+    this.setData({
+      posterSources: null,
+      checkinImage: e.detail,
+      showPhotoLayer: true,
+      showCheckin:true
+    });
+  },
+  onPosterSaved: function () {
+    wx.showToast({ title: "保存成功" });
+  },
+  onPosterSaveError: function () {
+    wx.showToast({ title: "保存失败", icon: "none" });
+  },
 
-	// savePoster: function () {
-	// 	this.setData({ save: true });
+  // savePoster: function () {
+  // 	this.setData({ save: true });
   // },
   savePoster() {
     wx.downloadFile({
       url: 'https://sightppp.oss-cn-shanghai.aliyuncs.com/projects/MBenz/poster.jpg',
-      success:(res)=>{
-        console.error('海报详情',res);
+      success: (res) => {
+        console.error('海报详情', res);
         if (res.statusCode === 200) {
           wx.saveImageToPhotosAlbum({
             filePath: res.tempFilePath,
-            success (res) {
+            success(res) {
 
             },
             fail(err) {
-              console.error('下载海报失败',err);
+              console.error('下载海报失败', err);
               wx.showToast({
-                icon:"none",
-                title:"保存海报失败,请重试!",
-                duration:2000
+                icon: "none",
+                title: "保存海报失败,请重试!",
+                duration: 2000
               })
             }
           })
         }
       },
-      fail:(err) =>{
-          wx.showToast({
-            icon:"none",
-            title:"保存失败请重试!",
-            duration:2000
-          })
+      fail: (err) => {
+        wx.showToast({
+          icon: "none",
+          title: "保存失败请重试!",
+          duration: 2000
+        })
       }
     })
-  }, 
-	savePhoto() {
-		///点击“保存图片”
-		let _this = this;
-		wx.showLoading({
-			title: "保存中",
-			mask: true,
-		});
-		wx.saveImageToPhotosAlbum({
-			filePath: this.data.photo,
-			success(res) {
-				wx.hideLoading();
-				wx.showToast({
-					title: "保存成功！前往相册查看您的商户优惠",
-					icon: "none",
-					duration: 3000,
-				});
-				_this.setData({
-					showPhotoLayer: true,
+  },
+  savePhoto() {
+    ///点击“保存图片”
+    let _this = this;
+    wx.showLoading({
+      title: "保存中",
+      mask: true,
+    });
+    wx.saveImageToPhotosAlbum({
+      filePath: this.data.photo,
+      success(res) {
+        wx.hideLoading();
+        wx.showToast({
+          title: "保存成功！前往相册查看您的商户优惠",
+          icon: "none",
+          duration: 3000,
+        });
+        _this.setData({
+          showPhotoLayer: true,
         });
         _this.savePoster()
-			},
-			fail(err) {
-				wx.hideLoading();
-				wx.showToast({
-					title: "保存失败",
-					icon: "none",
-				});
-			},
-		});
-	},
-	resetPhoto() {
-		this.setData({
-			showPhotoLayer: false,
-			showTakePhoto:true
-		})
-	},
-	takePic() {
-    const cameraContext =  wx.createCameraContext()
-    const info = wx.getWindowInfo()
-		console.log('has take');
+      },
+      fail(err) {
+        wx.hideLoading();
+        wx.showToast({
+          title: "保存失败",
+          icon: "none",
+        });
+      },
+    });
+  },
+  resetPhoto() {
     this.setData({
-			showTakePhoto: false,
-
+      showPhotoLayer: false,
+      showTakePhoto: true
+    })
+  },
+  takePic() {
+    const info = wx.getWindowInfo()
+    this.setData({
+      showTakePhoto: false,
       posterSources: [
         {
-          type: "camera",
-          cameraContext:cameraContext,
+          type: "webgl",
           x: 0,
           y: 0,
-          w: this.data.posterWidth,
-          h: (784 * info.windowWidth) / 750,
+          w: info.windowWidth,
+          h: this.data.posterHeight,
           fit: {
             mode: "cover",
             coverXRatio: 0.5,
@@ -1586,8 +1590,15 @@ Page({
         },
       ],
       
-      save: true,
+
     });
+    console.log('has take');
+    const that = this
+    setTimeout(() => {
+      that.setData({
+        isSave:true
+    })
+    },2000);
   },
 
 })

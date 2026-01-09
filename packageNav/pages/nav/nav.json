@@ -9,6 +9,6 @@
     "poster":"../../components/poster/poster"
 	},
 	"navigationBarTitleText": "",
-  "navigationStyle":"default",
+  "navigationStyle":"custom",
   "disableScroll": true
 }

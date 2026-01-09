@@ -467,9 +467,16 @@ function getDistance (contents, cameraPos) { // 获取cube与相机的距离
   return contents;
 }
 
+function canvasDrawBuffer(canvas2d, buffers, w, h) {
+	const ctx = canvas2d.getContext('2d');
+	let imageData = canvas2d.createImageData(new Uint8ClampedArray(buffers.slice(0)), w, h)
+	ctx.clearRect(0, 0, w, h);
+	ctx.putImageData(imageData, 0, 0);
+}
+
 module.exports = {
 	rpx2px, qiniuUrl, groupBy, keyBy, mapObject, parseParam, IS_DEVTOOLS, IS_ANDROID, IS_IOS, SUPPORTED,
 	couponFormat, couponsFormat, getSystemInfo, getAccountInfo, isSdkVersionAtleast, isVersionAtleast, getWindowHeightRpx,
 	wrapText, formatDate, getDayNum, getJiaoDian, getJuLi, delay, randomBetween, formatTime, imageToFormData, isIpx, parseTime, getRealLength, px2Rpx, debounce, throttle, mapByKey, Change, getImageInfo, getTime,
-	throttleNavigateTo, getPosForward, getDistance
+	throttleNavigateTo, getPosForward, getDistance,canvasDrawBuffer
 }

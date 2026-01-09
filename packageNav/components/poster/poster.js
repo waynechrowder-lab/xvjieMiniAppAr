@@ -29,6 +29,7 @@ Component({
 
                     let pixelRatio = wx.getSystemInfo().pixelRatio;
                     if (this.data.pixelRatio > 0) pixelRatio = this.data.pixelRatio;
+                    console.log("canvas,context",canvas, context)
                     this.poster = new Poster(canvas, context, this.data.width, this.data.height, pixelRatio);
 
                     this.triggerEvent("load");
@@ -60,6 +61,7 @@ Component({
             console.log("SAVE改变",value,this.data.sourceParams)
             this.triggerEvent("saveStart");
             if (!value) return;
+            console.log("执行逻辑")
             await this.loadPromise; // 等绘制完毕再save
             this.poster.saveToAlbum(this.data.fileType)
                 .then(() => {

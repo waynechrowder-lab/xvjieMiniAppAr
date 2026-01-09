@@ -1,4 +1,5 @@
-import { canvasDrawBuffer, wrapText } from "../../utils/util";
+import {  wrapText , canvasDrawBuffer} from "../../utils/util";
+// import {canvasDrawBuffer} from "./utils"
 
 export class PosterSource {
     constructor() {
@@ -147,26 +148,27 @@ export class PosterText extends PosterSource {
 
 export class PosterWebgl extends PosterImage {
     /**
-     * @param getApp
      * @param x
      * @param y
      * @param w
      * @param h
      * @param fit { {mode: "fill"|"contain"|"cover", coverXRatio: number, coverYRatio: number, coverXOffset: number, coverYOffset: number} }
      */
-    constructor({ getApp, x, y, w, h, fit }) {
+    constructor({  x, y, w, h, fit }) {
         super({ src: null, x, y, w, h, fit });
         this.app = getApp();
     }
 
     load(canvas, context) {
+        console.log("进入webglLoad")
         return new Promise((resolve, reject) => {
             //webgl截屏直接重用当前canvas，因为尺寸肯定比最终要画的webgl大，所以就算iOS端可能canvas的渲染分辨率没有原生那么大，也差不多够大了。
             //poster组件会先把canvas放到屏幕外（left属性），等到load结束再拿回来。
             const captureCanvas = canvas;
 
-            this.app.once("postrender", async () => {
-                let gl = this.app.graphicsDevice.gl;
+            // this.app.once("postrender", async () => {
+                let gl = this.app.globalData.poster.photoApp.graphicsDevice.gl;
+                console.log("gl属性",gl)
                 let [w, h] = [gl.drawingBufferWidth, gl.drawingBufferHeight];
 
                 //3d截图
@@ -204,7 +206,7 @@ export class PosterWebgl extends PosterImage {
                     },
                     fail: reject,
                 });
-            });
+            // });
         });
     }
 }

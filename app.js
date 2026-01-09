@@ -1,6 +1,6 @@
 // app.js
 import { license } from "./utils/config";
-const { setLicense, setWxApi, inject } = requirePlugin("SPARPlugin");
+const { setLicense, setWxApi, inject, bridge  } = requirePlugin("SPARPlugin");
 
 App({
   // ✅ 合并 globalData，避免被覆盖
