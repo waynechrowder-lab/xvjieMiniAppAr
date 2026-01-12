@@ -253,8 +253,10 @@ Component({
 			this.annotations = this.ema.annotations;
 			console.log("arannotations:",this.annotations);
 
-      console.log("this.pcCtx.app;",this.pcCtx.app.graphicsDevice.gl,ARManager.instance)
+      console.log("this.pcCtx;",this.pcCtx,ARManager.instance)
+      console.log("this.vkCtx;",this.vkCtx)
       wxapp.globalData.poster.photoApp = this.pcCtx.app;
+      wxapp.globalData.poster.PCContext = this.pcCtx;
       wxapp.globalData.poster.photoManager = ARManager.instance;
 
       wx.hideLoading();
@@ -338,6 +340,7 @@ Component({
         modelTinyApp: {
           routeModels : "https://tiny-app.gindxrstu.com/Default-zhengding/tinyapp.json",
           targetFinderModel : "https://tiny-app.gindxrstu.com/TargetFinder2-ZD/tinyapp.json",
+          navigatorModel : "https://tiny-app.gindxrstu.com/ZhonglingShuZiRen/tinyapp.json"
         }
       })
       console.log('navSetting', navSetting)
@@ -454,7 +457,6 @@ Component({
     },
     //获取ar画面
     takeARSnapshot({ ext = 'jpg', quality = 0.85 } = {}) {
-      console.log("takeARSnapshot",ARManager.instance.clsClient.takePhoto())
       // return new Promise((resolve, reject) => {
       //   if (!this._app3d || !this._canvas3d) {
       //     return reject(new Error('AR Canvas 未就绪'))

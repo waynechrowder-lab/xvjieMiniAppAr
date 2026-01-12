@@ -1,4 +1,4 @@
-import {  wrapText , canvasDrawBuffer} from "../../utils/util";
+import { wrapText, canvasDrawBuffer } from "../../utils/util";
 // import {canvasDrawBuffer} from "./utils"
 
 export class PosterSource {
@@ -146,69 +146,232 @@ export class PosterText extends PosterSource {
     }
 }
 
+// export class PosterWebgl extends PosterImage {
+//     /**
+//      * @param x
+//      * @param y
+//      * @param w
+//      * @param h
+//      * @param fit { {mode: "fill"|"contain"|"cover", coverXRatio: number, coverYRatio: number, coverXOffset: number, coverYOffset: number} }
+//      */
+//     constructor({ x, y, w, h, fit }) {
+//         super({ src: null, x, y, w, h, fit });
+//         this.app = getApp();
+//     }
+
+//     load(canvas, context) {
+//         console.log("进入webglLoad")
+//         return new Promise((resolve, reject) => {
+//             //webgl截屏直接重用当前canvas，因为尺寸肯定比最终要画的webgl大，所以就算iOS端可能canvas的渲染分辨率没有原生那么大，也差不多够大了。
+//             //poster组件会先把canvas放到屏幕外（left属性），等到load结束再拿回来。
+//             const captureCanvas = canvas;
+
+//             // this.app.once("postrender", async () => {
+
+//             // let gl = this.app.globalData.poster.photoApp.graphicsDevice.gl;
+//             // let photoApp = this.app?.globalData?.poster?.photoApp;
+//             // let gl = photoApp?.graphicsDevice?.gl;
+//             // let glCanvas = photoApp?.graphicsDevice?.canvas;
+//             // if (!gl) {
+//             //     reject(new Error("PosterWebgl: gl context unavailable"));
+//             //     return;
+//             // }
+//             // console.log("gl属性",gl)
+
+//             let photoApp = this.app?.globalData?.poster?.photoApp;
+//             let photoManager = this.app?.globalData?.poster?.photoManager;
+//             let gl = photoApp?.graphicsDevice?.gl;
+//             let glCanvas = photoApp?.graphicsDevice?.canvas;
+//             if (!gl && photoManager?.app?.graphicsDevice?.gl) {
+//                 gl = photoManager.app.graphicsDevice.gl;
+//                 glCanvas = photoManager.app.graphicsDevice.canvas;
+//             }
+//             if (!gl) {
+//                 reject(new Error("PosterWebgl: gl context unavailable"));
+//                 return;
+//             }
+
+//             let [w, h] = [gl.drawingBufferWidth, gl.drawingBufferHeight];
+//             if (!w || !h) {
+//                 w = glCanvas?.width || captureCanvas?.width || 0;
+//                 h = glCanvas?.height || captureCanvas?.height || 0;
+//             }
+//             if (!w || !h) {
+//                 reject(new Error("PosterWebgl: invalid capture size"));
+//                 return;
+//             }
+//             //3d截图
+//             let readPixelBuffer = new Uint8Array(w * h * 4);
+//             let buffer2 = new Uint8Array(w * h * 4);
+//             gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, readPixelBuffer);
+
+//             //y轴翻转
+//             for (let i = 0; i < h; i++) {
+//                 buffer2.set(readPixelBuffer.slice(w * 4 * i, w * 4 * (i + 1)), w * 4 * (h - i - 1));
+//             }
+
+//             //画到canvas上
+//             captureCanvas.width = w;
+//             captureCanvas.height = h;
+
+//             canvasDrawBuffer(captureCanvas, buffer2, w, h)
+
+//             //保存到相册
+//             wx.canvasToTempFilePath({
+//                 canvas: canvas,
+//                 fileType: "png",
+//                 x: 0,
+//                 y: 0,
+//                 width: w,
+//                 height: h,
+//                 destWidth: w,
+//                 destHeight: h,
+
+//                 success: result => {
+//                     this.image = canvas.createImage();
+//                     this.image.src = result.tempFilePath;
+//                     this.image.onload = () => resolve();
+//                     this.image.onerror = reject;
+//                 },
+//                 fail: reject,
+//             });
+//             // });
+//         });
+//     }
+// }
+
 export class PosterWebgl extends PosterImage {
-    /**
-     * @param x
-     * @param y
-     * @param w
-     * @param h
-     * @param fit { {mode: "fill"|"contain"|"cover", coverXRatio: number, coverYRatio: number, coverXOffset: number, coverYOffset: number} }
-     */
-    constructor({  x, y, w, h, fit }) {
-        super({ src: null, x, y, w, h, fit });
-        this.app = getApp();
-    }
+  /**
+   * @param x
+   * @param y
+   * @param w
+   * @param h
+   * @param fit { {mode: "fill"|"contain"|"cover", coverXRatio: number, coverYRatio: number, coverXOffset: number, coverYOffset: number} }
+   */
+  constructor({ x, y, w, h, fit }) {
+      super({ src: null, x, y, w, h, fit });
+      this.app = getApp();
+  }
 
-    load(canvas, context) {
-        console.log("进入webglLoad")
-        return new Promise((resolve, reject) => {
-            //webgl截屏直接重用当前canvas，因为尺寸肯定比最终要画的webgl大，所以就算iOS端可能canvas的渲染分辨率没有原生那么大，也差不多够大了。
-            //poster组件会先把canvas放到屏幕外（left属性），等到load结束再拿回来。
-            const captureCanvas = canvas;
+  load(canvas, context) {
+      console.log("进入webglLoad");
+      return new Promise((resolve, reject) => {
+          const captureCanvas = canvas;
 
-            // this.app.once("postrender", async () => {
-                let gl = this.app.globalData.poster.photoApp.graphicsDevice.gl;
-                console.log("gl属性",gl)
-                let [w, h] = [gl.drawingBufferWidth, gl.drawingBufferHeight];
+          // 方案1：优先使用 PCContext（从调试信息看这是正确的上下文）
+          let pcCtx = this.app?.globalData?.poster?.context;
+          let photoManager = this.app?.globalData?.poster?.photoManager;
+          
+          // 方案2：备用方案，通过 photoManager 获取
+          if (!pcCtx && photoManager?.app) {
+              pcCtx = photoManager.app;
+          }
+          
+          // 方案3：最后尝试 photoApp
+          if (!pcCtx) {
+              pcCtx = this.app?.globalData?.poster?.photoApp;
+          }
 
-                //3d截图
-                let readPixelBuffer = new Uint8Array(w * h * 4);
-                let buffer2 = new Uint8Array(w * h * 4);
-                gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, readPixelBuffer);
+          if (!pcCtx) {
+              reject(new Error("PosterWebgl: PCContext unavailable"));
+              return;
+          }
 
-                //y轴翻转
-                for (let i = 0; i < h; i++) {
-                    buffer2.set(readPixelBuffer.slice(w * 4 * i, w * 4 * (i + 1)), w * 4 * (h - i - 1));
-                }
+          // 获取图形设备
+          const graphicsDevice = pcCtx.graphicsDevice;
+          if (!graphicsDevice) {
+              reject(new Error("PosterWebgl: graphicsDevice unavailable"));
+              return;
+          }
 
-                //画到canvas上
-                captureCanvas.width = w;
-                captureCanvas.height = h;
+          // 获取 WebGL 上下文和画布
+          const gl = graphicsDevice.gl;
+          const glCanvas = graphicsDevice.canvas;
+          
+          if (!gl) {
+              reject(new Error("PosterWebgl: gl context unavailable"));
+              return;
+          }
 
-                canvasDrawBuffer(captureCanvas, buffer2, w, h)
+          // 获取渲染尺寸
+          let [w, h] = [gl.drawingBufferWidth, gl.drawingBufferHeight];
+          if (!w || !h) {
+              w = glCanvas?.width || captureCanvas?.width || 0;
+              h = glCanvas?.height || captureCanvas?.height || 0;
+          }
+          
+          if (!w || !h) {
+              reject(new Error("PosterWebgl: invalid capture size"));
+              return;
+          }
 
-                //保存到相册
-                wx.canvasToTempFilePath({
-                    canvas: canvas,
-                    fileType: "png",
-                    x: 0,
-                    y: 0,
-                    width: w,
-                    height: h,
-                    destWidth: w,
-                    destHeight: h,
+          // 使用 PlayCanvas 的渲染后事件确保在正确时机截图
+          const captureScreenshot = () => {
+              // 3D 截图 - 直接读取帧缓冲区
+              let readPixelBuffer = new Uint8Array(w * h * 4);
+              let buffer2 = new Uint8Array(w * h * 4);
+              
+              try {
+                  gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, readPixelBuffer);
 
-                    success: result => {
-                        this.image = canvas.createImage();
-                        this.image.src = result.tempFilePath;
-                        this.image.onload = () => resolve();
-                        this.image.onerror = reject;
-                    },
-                    fail: reject,
-                });
-            // });
-        });
-    }
+                  // Y轴翻转（WebGL坐标系与Canvas坐标系不同）
+                  for (let i = 0; i < h; i++) {
+                      buffer2.set(
+                          readPixelBuffer.slice(w * 4 * i, w * 4 * (i + 1)), 
+                          w * 4 * (h - i - 1)
+                      );
+                  }
+
+                  // 设置捕获画布尺寸
+                  captureCanvas.width = w;
+                  captureCanvas.height = h;
+
+                  // 绘制到canvas上
+                  canvasDrawBuffer(captureCanvas, buffer2, w, h);
+
+                  // 保存到临时文件
+                  wx.canvasToTempFilePath({
+                      canvas: canvas,
+                      fileType: "png",
+                      x: 0,
+                      y: 0,
+                      width: w,
+                      height: h,
+                      destWidth: w,
+                      destHeight: h,
+                      success: result => {
+                          this.image = canvas.createImage();
+                          this.image.src = result.tempFilePath;
+                          this.image.onload = () => {
+                              // 清理事件监听
+                              pcCtx.off("postrender", captureScreenshot);
+                              resolve();
+                          };
+                          this.image.onerror = (err) => {
+                              pcCtx.off("postrender", captureScreenshot);
+                              reject(err);
+                          };
+                      },
+                      fail: (err) => {
+                          pcCtx.off("postrender", captureScreenshot);
+                          reject(err);
+                      },
+                  });
+              } catch (error) {
+                  pcCtx.off("postrender", captureScreenshot);
+                  reject(error);
+              }
+          };
+
+          // 等待下一帧渲染完成后截图
+          pcCtx.once("postrender", captureScreenshot);
+          
+          // 强制触发一帧渲染（如果当前没有在渲染）
+          if (pcCtx.autoRender) {
+              pcCtx.renderNextFrame = true;
+          }
+      });
+  }
 }
 
 export class PosterCamera extends PosterImage {

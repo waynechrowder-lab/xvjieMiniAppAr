@@ -85,14 +85,11 @@ page{
 
 /* ✅ 截图：宽度占满“内窗”，高度自适应 */
 .checkinShot{
-  width: 90%;
-  height: auto;
   display: block;
   margin: 0 auto;
-
   position: relative;   /* ✅ 让 z-index 生效 */
   z-index: 10;
-  transform: translateY(-15%);
+  transform: translate(-15rpx,-13%);
 }
 
 .checkinSave{

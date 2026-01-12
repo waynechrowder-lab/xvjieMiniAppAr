@@ -14,6 +14,7 @@ const { ARManager } = tinyAllinone;
 const ENTER_DIST = 5      // 进入距离
 const EXIT_DIST = 7      // 退出距离（滞回）
 const COOLDOWN_MS = 3000 // 冷却时间：3秒
+const wxapp = getApp()
 
 Page({
   /**
@@ -881,16 +882,16 @@ Page({
 
   onPositionUpdate(distance) {
     if (this.data.myModule === 'arCheckin') {
-      // if (distance <= ENTER_DIST) {
+      if (distance <= ENTER_DIST) {
       this.setData({
         showTakePhoto: true
       })
-      // }
-      // else {
-      //   this.setData({
-      //     showTakePhoto: false
-      //   })
-      // }
+      }
+      else {
+        this.setData({
+          showTakePhoto: false
+        })
+      }
     }
     else if (this.data.myModule === 'arHistory') {
       let poi = this.data.historyPoi;
@@ -987,7 +988,8 @@ Page({
   },
 
   closeCheckin() {
-    this.setData({ showCheckin: false })
+    this.setData({ showCheckin: false,isSave:false })
+    this.onPosterSaveTemp()
   },
 
   noop() { },
@@ -1494,6 +1496,10 @@ Page({
   },
   onPosterSaved: function () {
     wx.showToast({ title: "保存成功" });
+    this.setData({
+      isSave:false,
+      showCheckin:false
+    })
   },
   onPosterSaveError: function () {
     wx.showToast({ title: "保存失败", icon: "none" });
@@ -1571,15 +1577,57 @@ Page({
   },
   takePic() {
     const info = wx.getWindowInfo()
+
+    let pcCtx = wxapp.globalData?.poster?.context;
+    let photoManager = wxapp.globalData?.poster?.photoManager;
+    
+    if (!pcCtx && photoManager?.app) {
+        pcCtx = photoManager.app;
+    }
+    
+    if (!pcCtx) {
+        pcCtx = wxapp.globalData?.poster?.photoApp;
+    }
+
+    if (!pcCtx) {
+        reject(new Error("PosterWebgl: PCContext unavailable"));
+        return;
+    }
+
+    const graphicsDevice = pcCtx.graphicsDevice;
+    if (!graphicsDevice) {
+        reject(new Error("PosterWebgl: graphicsDevice unavailable"));
+        return;
+    }
+    const gl = graphicsDevice.gl;
+    
+    const webglWidth = gl.drawingBufferWidth;
+    const webglHeight = gl.drawingBufferHeight;
+    
+    const displayRatio = webglWidth / webglHeight;
+    const containerWidth = info.windowWidth * 0.8;
+    const containerHeight = info.windowHeight * 0.8;
+    
+    let finalWidth, finalHeight;
+    if (containerWidth / containerHeight > displayRatio) {
+        // 容器更宽，高度适配
+        finalHeight = containerHeight;
+        finalWidth = containerHeight * displayRatio;
+    } else {
+        // 容器更高，宽度适配
+        finalWidth = containerWidth;
+        finalHeight = containerWidth / displayRatio;
+    }
+
     this.setData({
       showTakePhoto: false,
       posterSources: [
         {
           type: "webgl",
-          x: 0,
-          y: 0,
-          w: info.windowWidth,
-          h: this.data.posterHeight,
+          x: (containerWidth - finalWidth) / 2,  // 居中显示
+          y: (containerHeight - finalHeight) / 2,
+          w: finalWidth,
+          h: finalHeight,
           fit: {
             mode: "cover",
             coverXRatio: 0.5,
@@ -1589,16 +1637,17 @@ Page({
           },
         },
       ],
-      
-
+      posterWidth:finalWidth,
+      posterHeight:finalHeight,
+      isSave:true
     });
-    console.log('has take');
-    const that = this
-    setTimeout(() => {
-      that.setData({
-        isSave:true
-    })
-    },2000);
+    // console.log('has take');
+    // const that = this
+    // setTimeout(() => {
+    //   that.setData({
+        
+    // })
+    // },2000);
   },
 
 })

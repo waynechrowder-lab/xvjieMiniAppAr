@@ -12,7 +12,7 @@
 
     <!-- 面板：点内部不关闭 -->
     <view class="checkinPanel">
-      <image class="checkinShot" src="{{checkinImage}}" mode="widthFix"></image>
+      <image class="checkinShot" style="width:550rpx;height:950rpx;" src="{{checkinImage}}" mode="aspectFit"></image>
 
       <!-- 保存：面板底部 -->
       <view class="checkinSave" bindtap="saveCheckin" hover-class="tapDown">
